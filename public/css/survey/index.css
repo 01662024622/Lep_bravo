@@ -1,0 +1,173 @@
+* {
+    font-size: 14px;
+}
+
+.text-button {
+    font-size: 14px;
+}
+
+.form-label-header {
+    font-size: 14px;
+}
+
+.header-survey {
+    font-size: 30px;
+
+}
+
+.container-form {
+    border-radius: 3px;
+    margin-bottom: 20px !important;
+    border-top: 10px solid rgb(103, 58, 183) !important;
+}
+
+.container-form-body {
+    border-radius: 5px;
+    box-shadow: 0px 2px 10px rgb(0 0 0 / 8%);
+    background-color: #fff;
+    padding: 0;
+    max-width: 650px;
+    margin: auto;
+    margin-bottom: 20px;
+}
+
+.payment-form.dark {
+    background-color: rgb(240, 235, 248);
+
+}
+
+.header-logo {
+    width: 100%;
+    background-color: #000066;
+}
+
+.emoji {
+    font-size: 35px;
+    width: 60px;
+    height: 60px;
+    display: inline-block;
+    line-height: 60px;
+    position: relative;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+}
+
+.emoji-active {
+    background-color: rgb(240, 235, 248);
+    border: 1px solid #a0a0a0;
+}
+
+.checked-emoji {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    line-height: 15px;
+}
+
+.text-emoji {
+    font-size: 12px;
+}
+
+.hidden {
+    display: none;
+}
+
+.form-check-label {
+    font-size: 14px !important;
+    margin-bottom: 0px !important;
+    color: #212529 !important;
+}
+
+.opacity-7 {
+    opacity: 0.5;
+}
+
+div {
+    cursor: context-menu
+}
+
+.container-custom {
+    box-shadow: 0px 2px 10px rgb(0 0 0 / 8%);
+    background-color: #fff;
+    text-align: center;
+    display: inline-block;
+    padding: 0px;
+}
+
+.header-ups {
+    color: #ff9e16;
+    font-size: 90%;
+    font-weight: 700;
+    text-align: left;
+    padding-top: 10px;
+}
+
+.content-ups {
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.container-custom > row > row {
+    padding: 0px;
+}
+.emoji-image{
+    width: 35px;
+    height: auto;
+}
+
+.container-col {
+    padding-top: 10px;
+    border: 1px solid #ff9e16;
+}
+
+.header-col {
+    font-weight: 700;
+    font-size: 18px;
+    color: #ff9e16;
+}
+
+.header-target {
+    font-weight: 700;
+    font-size: 14px;
+    color: rgb(120, 120, 120);
+}
+
+.checkbox-container {
+    border: 1px solid #0f6848;
+    margin: 5px 0;
+    border-radius: 3px;
+    padding: 5px 10px;
+}
+
+.checkbox-checked {
+    background-color: #000066;
+    color: white;
+}
+
+.container-lv {
+    padding: 0 20px 0 60px;
+}
+.error{
+    color: red!important;
+    font-size: 10px!important;
+    padding-left: 20px!important;
+}
+#menuItems{
+    max-height: 200px;
+    overflow: auto;
+}
+#dropdown_coins{
+    padding-left: 10px;
+    background-color: transparent !important;
+    color: #495057;
+
+}
+#dropdown_coins{
+    width: 100%;
+    text-align: left;
+}

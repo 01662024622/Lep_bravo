@@ -1,0 +1,32 @@
+  body{
+    font: 90%/1.45em "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif !important;
+
+  }
+
+  .error{
+    color: red;
+  }
+  label{
+    font-weight: 700;
+  }
+  .dropdown-menu{
+    transform:none !important;
+  }
+  #date{
+    width: 280px;
+  }
+
+
+  .labelimage {
+    color: red;
+    display: none;
+  }
+  .btn-primary{
+    background-color: #000066
+  }
+  .page-item.active .page-link {
+    z-index: 1;
+    color: #fff;
+    background-color: #000066;
+    border-color: #4e73df;
+  }

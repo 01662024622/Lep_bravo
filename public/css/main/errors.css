@@ -1,0 +1,135 @@
+#name-error {
+    color: #5a5c69;
+    font-size: 0.8rem;
+    position: relative;
+    line-height: 1;
+    color: red
+}
+
+.error {
+    color: #5a5c69;
+    font-size: 0.8rem;
+    position: relative;
+    line-height: 1;
+    color: red;
+    width: 100%;
+}
+
+.image-product {
+    width: 200px;
+    height: auto;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    box-sizing: border-box;
+    display: inline-block;
+    min-width: 1.5em;
+    padding: 0.5em 1em;
+    margin-left: 2px;
+    text-align: center;
+    text-decoration: none !important;
+    cursor: pointer;
+    *cursor: hand;
+    color: #333 !important;
+    border: 1px soli d transparent;
+    border-radius: 2px;
+}
+
+.img-fluid-full {
+    width: 100%;
+    height: auto;
+}
+
+.loader {
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #000066;
+    border-bottom: 16px solid #000066;
+    width: 80px;
+    height: 80px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+    margin-left: 48%;
+    margin-top: 45vh;
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#load_page {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    background: #2d2e33;
+    z-index: 99999999999999999999999999999999999999999999999999999999999999999999999;
+    opacity: 0.9;
+    display: none;
+}
+
+table {
+    font-size: 0.8em;
+}
+
+.form-control-table {
+    font-size: 1em;
+}
+
+.btn-table {
+    font-size: 1em;
+}
+
+.file-upload {
+    overflow: revert;
+    max-width: 100%;
+}
+
+.add-header-nav {
+    position: fixed;
+    z-index: 9999999;
+    background: #fff !important;
+    width: calc(100vw - 6.5rem);
+}
+
+.ml-auto {
+    float: right;
+}
+
+.dropdown-menu-right {
+    z-index: 9999999999;
+}
+
+/*.dropdown-header>div{*/
+/*    padding: 5px;*/
+/*    margin: 0px;*/
+/*}*/
+.row {
+    display: flex !important;
+}
+
+#toast-container {
+    position: fixed;
+    z-index: 9999999999999999999999999999999999999999999999;
+    pointer-events: none;
+}
+
+.modal-dialog{
+    margin-top: 80px;
+}

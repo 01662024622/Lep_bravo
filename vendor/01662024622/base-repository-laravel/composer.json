@@ -1,0 +1,51 @@
+{
+    "name": "01662024622/base-repository-laravel",
+    "description": "Base repository implementation for Laravel",
+    "keywords": [
+        "laravel",
+        "repository",
+        "repository pattern",
+        "eloquent",
+        "repositories",
+        "service"
+    ],
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "thang vu",
+            "email": "vuthang.hustit@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8",
+        "mockery/mockery": "^0.9.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Repository\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "files": [
+            "base/RepositoryBase.php"
+        ],
+        "psr-4": {
+            "Repository\\Test\\": "base"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Repository\\RepositoryServiceProvider"
+            ]
+        }
+    },
+    "archive" : {
+        "exclude": [
+            "/base"
+        ]
+    }
+}

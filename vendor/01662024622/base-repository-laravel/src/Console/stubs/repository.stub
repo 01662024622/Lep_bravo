@@ -1,0 +1,15 @@
+<?php
+namespace DummyNamespace;
+
+use App\Repositories\AbstractRepository;
+use App\Repositories\{{ NamespaceInterface }};
+use App\Models\{{ NamespaceEntity }};
+
+class {{ class }} extends AbstractRepository implements {{ interface }}
+{
+   protected $model;
+   public function __construct({{entity}} $model)
+        {
+            parent::__construct($model);
+        }
+}

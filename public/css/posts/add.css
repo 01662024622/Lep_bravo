@@ -1,0 +1,41 @@
+#cke_1_contents {
+    min-height: 500px !important;
+}
+.header-item{
+    width: 100%;
+    border: 1px solid #CCD0D4;
+    outline: 1px solid #ECEDEE;
+    background-color: white;
+    padding: 2px 0px 5px 5px;
+}
+.item{
+    margin-top: 30px;
+    border-radius: 2px 0px;
+}
+.header-item>p{
+    color: black;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0px;
+}
+.input-custom{
+    border-radius: 0px 2px;
+}
+#embed{
+    width: 100%;
+
+}
+.header-body{
+    background: #f5f5f5;
+    padding: 5px;
+}
+#categorilist{
+    list-style-type: none;
+}
+.scroll{
+    overflow-y: scroll;
+    height: 230px;
+}
+input[type=checkbox] {
+    transform: scale(1.5);
+}

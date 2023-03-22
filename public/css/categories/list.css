@@ -1,0 +1,23 @@
+.image-avata{
+    width: 100%;
+    height: auto;
+}
+.avata-container{
+//    padding: 10px;
+}
+.title-link{
+    font-weight: 700;
+    font-size: 18px;
+    color: #000066;
+}
+.date{
+    font-size: 12px;
+    font-style: italic;
+}
+.container-custome{
+    padding: 3px;
+    border: solid 2px #000066;
+}
+.container-post{
+    width: 80%;
+}

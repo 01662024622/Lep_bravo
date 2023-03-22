@@ -1,0 +1,16 @@
+.collum{
+    border: 1px solid rgb(227, 230, 240);
+}
+.collum-bottom{
+    border-bottom: 1px solid rgb(227, 230, 240);
+    padding: 12px 0;
+}
+.collum-top{
+    border-bottom: 1px solid rgb(227, 230, 240);
+}
+.collum-right{
+    border-right: 1px solid rgb(227, 230, 240);
+}
+.list-kpi{
+    padding: 0 15px !important;
+}

@@ -1,0 +1,1 @@
+[19-Feb-2021 09:31:02 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 7.3.0". You are running 5.5.38. in /home/phu40d3b/public_html/vendor/composer/platform_check.php on line 25

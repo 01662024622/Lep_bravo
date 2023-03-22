@@ -1,0 +1,33 @@
+.form-control{
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    margin: 7px 0;
+}
+.form-check-label{
+    font-weight: 400!important;
+}
+.form-check{
+    margin: 5px 0;
+}
+.form-label-header {
+    padding-left: 10px;
+    color: #495057 !important;
+    font-weight: 500 !important;
+    font-size: 18px !important;
+}
+.form-group {
+    margin-bottom: 2rem;
+}
+.valid-feedback{
+    color: red;
+}
+.payment-form .card-details button {
+    padding: 6px 12px;
+}
+.form-check-label:first-letter{
+    text-transform: capitalize
+}
+.form-label-header:first-letter{
+    text-transform: capitalize
+}
