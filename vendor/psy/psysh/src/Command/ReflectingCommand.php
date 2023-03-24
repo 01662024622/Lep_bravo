@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2020 Justin Hileman
+ * (c) 2012-2023 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -57,7 +57,7 @@ abstract class ReflectingCommand extends Command implements ContextAware
      *
      * @return array (class or instance name, member name, kind)
      */
-    protected function getTarget($valueName)
+    protected function getTarget(string $valueName): array
     {
         $valueName = \trim($valueName);
         $matches = [];
@@ -92,10 +92,8 @@ abstract class ReflectingCommand extends Command implements ContextAware
      *
      * @param string $name
      * @param bool   $includeFunctions (default: false)
-     *
-     * @return string
      */
-    protected function resolveName($name, $includeFunctions = false)
+    protected function resolveName(string $name, bool $includeFunctions = false): string
     {
         $shell = $this->getApplication();
 
@@ -120,10 +118,7 @@ abstract class ReflectingCommand extends Command implements ContextAware
         // Check $name against the current namespace and use statements.
         if (self::couldBeClassName($name)) {
             try {
-                $maybeAlias = $this->resolveCode($name.'::class');
-                if ($maybeAlias !== $name) {
-                    return $maybeAlias;
-                }
+                $name = $this->resolveCode($name.'::class');
             } catch (RuntimeException $e) {
                 // /shrug
             }
@@ -143,10 +138,10 @@ abstract class ReflectingCommand extends Command implements ContextAware
     /**
      * Check whether a given name could be a class name.
      */
-    protected function couldBeClassName($name)
+    protected function couldBeClassName(string $name): bool
     {
         // Regex based on https://www.php.net/manual/en/language.oop5.basic.php#language.oop5.basic.class
-        return \preg_match('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\\[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*)*$/', $name);
+        return \preg_match('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*(\\\\[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*)*$/', $name) === 1;
     }
 
     /**
@@ -156,7 +151,7 @@ abstract class ReflectingCommand extends Command implements ContextAware
      *
      * @return array (value, Reflector)
      */
-    protected function getTargetAndReflector($valueName)
+    protected function getTargetAndReflector(string $valueName): array
     {
         list($value, $member, $kind) = $this->getTarget($valueName);
 
@@ -172,11 +167,11 @@ abstract class ReflectingCommand extends Command implements ContextAware
      *
      * @return mixed Variable value
      */
-    protected function resolveCode($code)
+    protected function resolveCode(string $code)
     {
         try {
             $value = $this->getApplication()->execute($code, true);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Swallow all exceptions?
         }
 
@@ -196,7 +191,7 @@ abstract class ReflectingCommand extends Command implements ContextAware
      *
      * @return object Variable instance
      */
-    private function resolveObject($code)
+    private function resolveObject(string $code)
     {
         $value = $this->resolveCode($code);
 
@@ -214,7 +209,7 @@ abstract class ReflectingCommand extends Command implements ContextAware
      *
      * @return mixed Variable instance
      */
-    protected function resolveInstance($name)
+    protected function resolveInstance(string $name)
     {
         @\trigger_error('`resolveInstance` is deprecated; use `resolveCode` instead.', \E_USER_DEPRECATED);
 
@@ -228,7 +223,7 @@ abstract class ReflectingCommand extends Command implements ContextAware
      *
      * @return mixed
      */
-    protected function getScopeVariable($name)
+    protected function getScopeVariable(string $name)
     {
         return $this->context->get($name);
     }
@@ -238,7 +233,7 @@ abstract class ReflectingCommand extends Command implements ContextAware
      *
      * @return array
      */
-    protected function getScopeVariables()
+    protected function getScopeVariables(): array
     {
         return $this->context->getAll();
     }

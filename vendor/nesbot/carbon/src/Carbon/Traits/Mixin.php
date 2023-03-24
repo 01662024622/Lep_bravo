@@ -8,6 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Carbon\Traits;
 
 use Closure;
@@ -65,8 +66,8 @@ trait Mixin
     public static function mixin($mixin)
     {
         \is_string($mixin) && trait_exists($mixin)
-            ? static::loadMixinTrait($mixin)
-            : static::loadMixinClass($mixin);
+            ? self::loadMixinTrait($mixin)
+            : self::loadMixinClass($mixin);
     }
 
     /**
@@ -107,10 +108,14 @@ trait Mixin
                 $context = isset($this) ? $this->cast($className) : new $className();
 
                 try {
-                    $closure = $closureBase->bindTo($context);
-                } catch (Throwable $throwable) {
-                    $closure = $closureBase;
+                    // @ is required to handle error if not converted into exceptions
+                    $closure = @$closureBase->bindTo($context);
+                } catch (Throwable $throwable) { // @codeCoverageIgnore
+                    $closure = $closureBase; // @codeCoverageIgnore
                 }
+
+                // in case of errors not converted into exceptions
+                $closure = $closure ?: $closureBase;
 
                 return $closure(...\func_get_args());
             });
@@ -146,22 +151,12 @@ trait Mixin
     protected static function bindMacroContext($context, callable $callable)
     {
         static::$macroContextStack[] = $context;
-        $exception = null;
-        $result = null;
 
         try {
-            $result = $callable();
-        } catch (Throwable $throwable) {
-            $exception = $throwable;
+            return $callable();
+        } finally {
+            array_pop(static::$macroContextStack);
         }
-
-        array_pop(static::$macroContextStack);
-
-        if ($exception) {
-            throw $exception;
-        }
-
-        return $result;
     }
 
     /**

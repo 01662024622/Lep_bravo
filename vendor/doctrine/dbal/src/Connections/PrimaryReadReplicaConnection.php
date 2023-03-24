@@ -8,11 +8,14 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Driver\Exception as DriverException;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Event\ConnectionEventArgs;
 use Doctrine\DBAL\Events;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Statement;
+use Doctrine\Deprecations\Deprecation;
 use InvalidArgumentException;
+use SensitiveParameter;
 
 use function array_rand;
 use function count;
@@ -56,6 +59,7 @@ use function count;
  *
  * Instantiation through the DriverManager looks like:
  *
+ * @psalm-import-type Params from DriverManager
  * @example
  *
  * $conn = DriverManager::getConnection(array(
@@ -93,7 +97,8 @@ class PrimaryReadReplicaConnection extends Connection
      *
      * @internal The connection can be only instantiated by the driver manager.
      *
-     * @param mixed[] $params
+     * @param array<string,mixed> $params
+     * @psalm-param Params $params
      *
      * @throws Exception
      * @throws InvalidArgumentException
@@ -112,9 +117,12 @@ class PrimaryReadReplicaConnection extends Connection
             throw new InvalidArgumentException('You have to configure at least one replica.');
         }
 
-        $params['primary']['driver'] = $params['driver'];
-        foreach ($params['replica'] as $replicaKey => $replica) {
-            $params['replica'][$replicaKey]['driver'] = $params['driver'];
+        if (isset($params['driver'])) {
+            $params['primary']['driver'] = $params['driver'];
+
+            foreach ($params['replica'] as $replicaKey => $replica) {
+                $params['replica'][$replicaKey]['driver'] = $params['driver'];
+            }
         }
 
         $this->keepReplica = (bool) ($params['keepReplica'] ?? false);
@@ -140,7 +148,7 @@ class PrimaryReadReplicaConnection extends Connection
         if ($connectionName !== null) {
             throw new InvalidArgumentException(
                 'Passing a connection name as first argument is not supported anymore.'
-                    . ' Use ensureConnectedToPrimary()/ensureConnectedToReplica() instead.'
+                    . ' Use ensureConnectedToPrimary()/ensureConnectedToReplica() instead.',
             );
         }
 
@@ -192,6 +200,13 @@ class PrimaryReadReplicaConnection extends Connection
         }
 
         if ($this->_eventManager->hasListeners(Events::postConnect)) {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/5784',
+                'Subscribing to %s events is deprecated. Implement a middleware instead.',
+                Events::postConnect,
+            );
+
             $eventArgs = new ConnectionEventArgs($this);
             $this->_eventManager->dispatchEvent(Events::postConnect, $eventArgs);
         }
@@ -249,8 +264,11 @@ class PrimaryReadReplicaConnection extends Connection
      *
      * @return mixed
      */
-    protected function chooseConnectionConfiguration($connectionName, $params)
-    {
+    protected function chooseConnectionConfiguration(
+        $connectionName,
+        #[SensitiveParameter]
+        $params
+    ) {
         if ($connectionName === 'primary') {
             return $params['primary'];
         }

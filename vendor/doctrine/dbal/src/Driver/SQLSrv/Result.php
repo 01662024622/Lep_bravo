@@ -80,10 +80,6 @@ final class Result implements ResultInterface
 
     public function rowCount(): int
     {
-        if ($this->statement === null) {
-            return 0;
-        }
-
         $count = sqlsrv_rows_affected($this->statement);
 
         if ($count !== false) {
@@ -95,10 +91,6 @@ final class Result implements ResultInterface
 
     public function columnCount(): int
     {
-        if ($this->statement === null) {
-            return 0;
-        }
-
         $count = sqlsrv_num_fields($this->statement);
 
         if ($count !== false) {
@@ -118,9 +110,7 @@ final class Result implements ResultInterface
         }
     }
 
-    /**
-     * @return mixed|false
-     */
+    /** @return mixed|false */
     private function fetch(int $fetchType)
     {
         return sqlsrv_fetch_array($this->statement, $fetchType) ?? false;

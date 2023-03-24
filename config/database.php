@@ -90,7 +90,23 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
         ],
+        'odbc' => [
+            'driver'   => 'odbc',
+            'dsn'      => env('ODBC_DSN'),
+            'host'     => env('ODBC_HOST'),
+            'database' => env('ODBC_DB'),
+            'username' => env('ODBC_USERNAME'),
+            'password' => env('ODBC_PASSWORD'),
+        ],
 
+    ],
+    'odbc' => [
+        'driver'   => 'odbc',
+        'dsn'      => env('ODBC_DSN'),
+        'host'     => env('ODBC_HOST'),
+        'database' => env('ODBC_DB'),
+        'username' => env('ODBC_USERNAME'),
+        'password' => env('ODBC_PASSWORD'),
     ],
 
     /*

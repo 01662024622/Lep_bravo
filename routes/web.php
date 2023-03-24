@@ -17,7 +17,7 @@ use \Illuminate\Support\Facades\Auth;
 Auth::routes();
 
 
-Route::get('/', function (){ return view("test");});
+Route::get('/', function (){phpinfo(); });
 Route::get('/insurance-end-point', 'HT11\InsuranceController@noInsurance');
 
 

@@ -3,6 +3,7 @@
 namespace Doctrine\DBAL\Schema;
 
 use Doctrine\DBAL\Schema\Visitor\Visitor;
+use Doctrine\Deprecations\Deprecation;
 
 use function count;
 use function sprintf;
@@ -35,25 +36,19 @@ class Sequence extends AbstractAsset
         $this->cache = $cache;
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     public function getAllocationSize()
     {
         return $this->allocationSize;
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     public function getInitialValue()
     {
         return $this->initialValue;
     }
 
-    /**
-     * @return int|null
-     */
+    /** @return int|null */
     public function getCache()
     {
         return $this->cache;
@@ -67,7 +62,7 @@ class Sequence extends AbstractAsset
     public function setAllocationSize($allocationSize)
     {
         if ($allocationSize > 0) {
-            $this->allocationSize = (int) $allocationSize;
+            $this->allocationSize = $allocationSize;
         } else {
             $this->allocationSize = 1;
         }
@@ -83,7 +78,7 @@ class Sequence extends AbstractAsset
     public function setInitialValue($initialValue)
     {
         if ($initialValue > 0) {
-            $this->initialValue = (int) $initialValue;
+            $this->initialValue = $initialValue;
         } else {
             $this->initialValue = 1;
         }
@@ -139,10 +134,18 @@ class Sequence extends AbstractAsset
     }
 
     /**
+     * @deprecated
+     *
      * @return void
      */
     public function visit(Visitor $visitor)
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5435',
+            'Sequence::visit() is deprecated.',
+        );
+
         $visitor->acceptSequence($this);
     }
 }
