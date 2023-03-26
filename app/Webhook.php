@@ -10,4 +10,5 @@ class Webhook extends Model
         'data'
     ];
     protected $table = "webhook";
+
 }

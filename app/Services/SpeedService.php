@@ -42,6 +42,14 @@ class SpeedService
         return $response->body;
 
     }
+    public function getOrderDetail($id)
+    {
+        $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
+        $data = $this->getBody("{\"id\":".$id."}");
+        $response = Api::post('https://open.nhanh.vn/api/order/index', $headers, $data);
+        return $response->body;
+
+    }
 
     public function getCustomersPoint()
     {
