@@ -180,26 +180,19 @@ class BravoController extends Controller
         $data = B30AccDocSales::setDataRefund($order, $customer, $employeeid, $warehouse);
         $acc = B30AccDocSales::create($data);
         $acc = B30AccDocSales::find($acc->Id);
-        $accRefund = B30AccDocSales::where("DocNo", "HDN" . $order->returnFromOrderId)->get();
-        sizeof($accRefund) > 0 ? $accRefund = $accRefund[0]->Stt : null;
+        $accSale = B30AccDocSales::where("DocNo", "HDN" . $order->returnFromOrderId)->get();
+        sizeof($accSale) > 0 ? $accSale = $accSale[0]->Stt : null;
         $i = 1;
-        $usedPoints = $order->usedPoints;
-        $calcTotalMoney = $order->calcTotalMoney + $order->moneyDiscount + $usedPoints;
-        $moneyDiscountPercent = $usedPoints / $calcTotalMoney;
-        $allotted = 0;
         foreach ($order->products as $item) {
             $itemInfo = B20Item::where("Code", $item->productCode)->get();
             if (sizeof($itemInfo) > 0) {
                 $itemInfo = $itemInfo[0];
             }
-            if ($i == sizeof($order->products)) {
-                $item->usedPoints = $usedPoints - $allotted;
-            } else {
-
-                $item->usedPoints = $item->price * $moneyDiscountPercent;
-                $allotted = $allotted + $item->usedPoints;
+            $itemAccInfo = B30AccDocSales1::where("Stt", $accSale)->where("ItemId",$itemInfo->Id)->get();
+            if (sizeof($itemAccInfo) > 0) {
+                $itemAccInfo = $itemAccInfo[0];
             }
-            $line = B30AccDocSales2::setData($i, $item, $customer, $itemInfo, $warehouse, $acc->Stt, $accRefund);
+            $line = B30AccDocSales2::setData($i, $item, $customer, $itemInfo, $warehouse, $acc->Stt,$itemAccInfo);
             B30AccDocSales2::create($line);
             $i++;
         }

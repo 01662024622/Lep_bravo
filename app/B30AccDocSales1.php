@@ -51,7 +51,7 @@ class B30AccDocSales1 extends Model
 
             'Amount4'=>$item->discount*$item->quantity,
             'OriginalAmount4'=>$item->discount*$item->quantity,
-            'DiscountRate'=>$item->price==0||$item->quantity==0?0:$item->discount/($item->price*$item->quantity)*100,
+            'DiscountRate'=>$item->price==0||$item->quantity==0?0:$item->discount/($item->price*$item->quantity),
             'Amount41'=>$item->usedPoints,
             'OriginalAmount41'=>$item->usedPoints,
 

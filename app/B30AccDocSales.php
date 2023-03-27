@@ -88,7 +88,7 @@ class B30AccDocSales extends Model
             'TotalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney*-1,
             'TotalAmount4'=>$order->moneyDiscount,
             'TotalAmountDl'=> $order->shipFee,
-            'TotalAmount'=>$order->calcTotalMoney,
+            'TotalAmount'=>$order->calcTotalMoney*-1,
             'TotalOriginalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney*-1,
             'TotalOriginalAmount4'=>$order->moneyDiscount,
             'TotalOriginalAmountDl'=>$order->shipFee,
@@ -138,9 +138,12 @@ class B30AccDocSales extends Model
     public static function runExec($acc){
         DB::statement("use B8R3_AuCouture_TT_QT;EXECUTE dbo.usp_B30AccDoc_Post
         @_BranchCode = 'A01',
-        @_Stt = ".$acc->Stt.", @_DocDate = '".Carbon::today()->format('Y-m-d')."',
+        @_Stt = ".$acc->Stt.",
+        @_DocDate = '".Carbon::today()->format('Y-m-d')."',
         @_DocCode = 'HD',
-        @_DocStatus = 1,
+        @_DocStatus = $acc->DocStatus,
+        @_UpdateType = NULL,
+        @_RelationSttListNotUpdate = 1,
         @_FiscalYear = ".Carbon::today()->format('Y')."");
     }
 }

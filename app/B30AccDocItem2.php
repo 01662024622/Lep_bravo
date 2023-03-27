@@ -9,7 +9,7 @@ class B30AccDocItem2 extends Model
 {
     protected $fillable = [
         'ItemId', 'BranchCode', 'Unit', 'Quantity', 'ConvertRate9', 'Quantity9', 'OriginalUnitCost', 'UnitCost', 'OriginalAmount9',
-         'Amount9', 'CreatedBy', 'DebitAccount', 'CreditAccount', 'WarehouseId','Stt','DocDate','DocGroup','DocCode'];
+         'Amount9', 'CreatedBy', 'DebitAccount', 'CreditAccount', 'WarehouseId','Stt','DocDate','DocGroup','DocCode','TransCode'];
     protected $primaryKey ='Id';
     protected $table = "B30AccDocItem2";
     public $timestamps = false;
@@ -35,7 +35,7 @@ class B30AccDocItem2 extends Model
             'CreditAccount'=>'15611', //632
 
             'WarehouseId'=>$warehouse?$warehouse->Id:0,
-
+            'TransCode '=>'2107',
             'Gia_Tb_Tt' => '1',
             'CreatedBy' => 4,
             'BranchCode' => 'A01',

@@ -13,11 +13,11 @@ class B30AccDocSales2 extends Model
          'Amount9', 'OriginalAmount2', 'Amount2',
           'DebitAccount2', 'CreditAccount2', 'DebitAccount', 'CreditAccount', 'DebitAccount3',
            'Amount3', 'OriginalAmount3', 'Amount4', 'OriginalAmount4', 'DiscountRate', 'DebitAccount4',
-            'OriginalAmount41', 'Amount41', 'DebitAccount41', 'CreatedBy', 'Gia_Tb_Tt', 'WarehouseId','Stt_Hbtl'];
+            'OriginalAmount41', 'Amount41', 'DebitAccount41', 'CreatedBy', 'Gia_Tb_Tt', 'WarehouseId','Stt_Hbtl','TransCode '];
     protected $primaryKey ='Id';
     protected $table = "B30AccDocSales2";
     public $timestamps = false;
-    public static function setData($index,$item, $customer, $itemInfo, $warehouse,$Stt,$SttRefund): array
+    public static function setData($index,$item, $customer, $itemInfo, $warehouse,$Stt,$itemAccInfo): array
     {
         return  [
             'Stt'=>$Stt,
@@ -38,10 +38,10 @@ class B30AccDocSales2 extends Model
             'OriginalAmount2'=>$item->price*$item->quantity,
             'Amount2'=>$item->price*$item->quantity,
 
-            'CreditAccount2'=>$warehouse?$warehouse->ClassCode2:'131',
-            'DebitAccount2'=>'5111',
+            'CreditAccount2'=>$itemAccInfo->DebitAccount2,
+            'DebitAccount2'=>'5212',
             'CreditAccount'=>'632',
-            'DebitAccount'=>$warehouse?$warehouse->ClassCode1:'',
+            'DebitAccount'=>$warehouse->Name2?$warehouse->Name2:'1561',
             'DebitAccount3'=>'',
             'CreditAccount3'=>'',
             'Amount3'=>0,
@@ -51,18 +51,18 @@ class B30AccDocSales2 extends Model
 
             'Amount4'=>$item->discount*$item->quantity,
             'OriginalAmount4'=>$item->discount*$item->quantity,
-            'DiscountRate'=>$item->price==0||$item->quantity==0?0:$item->discount/($item->price*$item->quantity)*100,
-            'Amount41'=>$item->usedPoints,
-            'OriginalAmount41'=>$item->usedPoints,
+            'DiscountRate'=>$item->price==0||$item->quantity==0?0:$item->discount/($item->price*$item->quantity),
+
 
             'WarehouseId'=>$warehouse?$warehouse->Id:0,
 
-            'Stt_Hbtl'=>$SttRefund,
+            'Stt_Hbtl'=>$itemAccInfo->RowId,
             'Gia_Tb_Tt' => '1',
             'CreatedBy' => 4,
             'BranchCode' => 'A01',
             'DocGroup' => '1',
             'DocCode' => 'TL',
+            'TransCode '=>'2107'
         ];
     }
 }
