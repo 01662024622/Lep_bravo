@@ -17,10 +17,9 @@ class B30AccDocSales2 extends Model
     protected $primaryKey ='Id';
     protected $table = "B30AccDocSales2";
     public $timestamps = false;
-    public static function setData($index,$item, $customer, $itemInfo, $warehouse,$Stt,$itemAccInfo): array
+    public static function setData($index,$item, $customer, $itemInfo, $warehouse,$itemAccInfo): array
     {
         return  [
-            'Stt'=>$Stt,
             'DocDate' => Carbon::today()->format('Y-m-d'),
             'BuiltinOrder' => $index,
             'CustomerId' => $customer->Id,
@@ -41,7 +40,7 @@ class B30AccDocSales2 extends Model
             'CreditAccount2'=>$itemAccInfo->DebitAccount2,
             'DebitAccount2'=>'5212',
             'CreditAccount'=>'632',
-            'DebitAccount'=>$warehouse->Name2?$warehouse->Name2:'1561',
+            'DebitAccount'=>$warehouse->Name2?$warehouse->Name20:'1561',
             'DebitAccount3'=>'',
             'CreditAccount3'=>'',
             'Amount3'=>0,

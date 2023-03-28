@@ -17,10 +17,16 @@ class B30AccDocSales1 extends Model
     protected $primaryKey ='Id';
     protected $table = "B30AccDocSales1";
     public $timestamps = false;
-    public static function setData($index,$item, $customer, $itemInfo, $warehouse,$Stt): array
+    public static function getItemByStt($accSale,$id){
+        $itemAccInfo = B30AccDocSales1::where("Stt", $accSale)->where("ItemId", $id)->get();
+            if (sizeof($itemAccInfo) > 0) {
+                return  $itemAccInfo[0];
+            }
+        return null;
+    }
+    public static function setData($index,$item, $customer, $itemInfo, $warehouse): array
     {
         return  [
-            'Stt'=>$Stt,
             'DocDate' => Carbon::today()->format('Y-m-d'),
             'BuiltinOrder' => $index,
             'CustomerId' => $customer->Id,

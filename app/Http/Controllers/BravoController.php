@@ -33,7 +33,8 @@ class BravoController extends Controller
     public function create(Request $request)
     {
 
-        $this->SpeedService = SpeedService::getInstance();
+        $data = $this->SpeedService->getWarehousing()->data->bill;
+
         $speed = json_decode(json_encode($request->only(["event", "webhooksVerifyToken", "data"])), FALSE);
 
         if ($speed->webhooksVerifyToken != "Thangui0011@@1996") return response('error', 404);
@@ -75,6 +76,9 @@ class BravoController extends Controller
         return response("true", 200);
     }
 
+
+
+
     private function procedureAddOrder($speed)
     {
         //detail order
@@ -90,10 +94,17 @@ class BravoController extends Controller
         if ($order->typeId == 1) return $this->procedureAddOrderReal($order);
         if ($order->typeId == 14) return $this->procedureAddOrderRefund($order);
     }
+
+
+
+
+
+
+
     private function procedureChange($order)
     {
         foreach ($order->bill as $i) {
-            $order= $i;
+            $order = $i;
             break;
         }
         // detail from bravo
@@ -135,6 +146,12 @@ class BravoController extends Controller
         B30AccDocSales::runExec($acc);
         return response("true", 200);
     }
+
+
+
+
+
+
     private function procedureAddOrderReal($order)
     {
         // detail from bravo
@@ -144,35 +161,61 @@ class BravoController extends Controller
         $order->usedPoints = $order->usedPoints ? $order->usedPoints : 0;
         $order->moneyDiscount = $order->moneyDiscount ? $order->moneyDiscount : 0;
         $data = B30AccDocSales::setData($order, $customer, $employeeid, $warehouse);
+        $i = 1;
+        $j = 1;
+        $coin = new Coin($order);
+        $listAccDocSale1 = [];
+        foreach ($order->products as $item) {
+            $itemInfo = B20Item::getItemByCode($item->productCode);
+            if ($itemInfo==null) {
+                $order->desciption = $item->productCode .'-'. $order->desciption;
+                continue;
+            }
+            // set Coin
+            $item->usedPoints = $coin->getCoin($j == sizeof($order->products),$item->price);
+
+            $listAccDocSale1[]= B30AccDocSales1::setData($i, $item, $customer, $itemInfo, $warehouse);
+            $i++;
+            $j++;
+            // check sản phẩm có quà tặng kèm không nếu có thì add vào với giá 0đ
+            if (property_exists($item, "giftProducts")) {
+                if (sizeof($item->giftProducts) > 0) {
+                    foreach ($item->giftProducts as $gift) {
+
+                        $giftInfo = B20Item::getItemByCode($gift->productCode);
+                        if ($giftInfo==null) {
+                            $order->desciption = $item->productCode .'-'. $order->desciption;
+                            continue;
+                        }
+                        $gift->Price = 0;
+                        $gift->usedPoints = 0;
+                        $gift->discount = 0;
+                        $gift->quantity = $gift->productQuantity;
+                        $listAccDocSale1[]= B30AccDocSales1::setData($i, $gift, $customer, $giftInfo, $warehouse);
+                        $i++;
+                    }
+                }
+            }
+        }
+        $data["Description"] = $order->desciption!=""?$data["Description"]."-".$order->desciption:$data["Description"];
         $acc = B30AccDocSales::create($data);
         $acc = B30AccDocSales::find($acc->Id);
-        $i = 1;
-        $usedPoints = $order->usedPoints;
-        $calcTotalMoney = $order->calcTotalMoney + $order->moneyDiscount + $usedPoints;
-        $moneyDiscountPercent = $usedPoints / $calcTotalMoney;
-        $allotted = 0;
-        foreach ($order->products as $item) {
-            $itemInfo = B20Item::where("Code", $item->productCode)->get();
-            if (sizeof($itemInfo) > 0) {
-                $itemInfo = $itemInfo[0];
-            }
-            if ($i == sizeof($order->products)) {
-                $item->usedPoints = $usedPoints - $allotted;
-            } else {
-
-                $item->usedPoints = $item->price * $moneyDiscountPercent;
-                $allotted = $allotted + $item->usedPoints;
-            }
-            $line = B30AccDocSales1::setData($i, $item, $customer, $itemInfo, $warehouse, $acc->Stt);
-            B30AccDocSales1::create($line);
-            $i++;
+        foreach($listAccDocSale1 as $sale){
+            $sale["Stt"] = $acc->Stt;
+            B30AccDocSales1::create($sale);
         }
         B30AccDocSales::runExec($acc);
         return response("true", 200);
     }
+
+
+
+
+
     private function procedureAddOrderRefund($order)
     {
         // detail from bravo
+        $this->SpeedService = null;
         $customer = B20Customer::getCustomer($order);
         $warehouse = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
@@ -183,29 +226,58 @@ class BravoController extends Controller
         $accSale = B30AccDocSales::where("DocNo", "HDN" . $order->returnFromOrderId)->get();
         sizeof($accSale) > 0 ? $accSale = $accSale[0]->Stt : null;
         $i = 1;
+        $listAccDocSale2 = [];
         foreach ($order->products as $item) {
-            $itemInfo = B20Item::where("Code", $item->productCode)->get();
-            if (sizeof($itemInfo) > 0) {
-                $itemInfo = $itemInfo[0];
+            $itemInfo = B20Item::getItemByCode($item->productCode);
+            if ($itemInfo==null) {
+                $order->desciption = $item->productCode .'-'. $order->desciption;
+                continue;
             }
-            $itemAccInfo = B30AccDocSales1::where("Stt", $accSale)->where("ItemId",$itemInfo->Id)->get();
-            if (sizeof($itemAccInfo) > 0) {
-                $itemAccInfo = $itemAccInfo[0];
+            $itemAccInfo = B30AccDocSales1::getItemByStt($accSale,$itemInfo->Id);
+            if ($itemAccInfo==null) {
+                $order->desciption = $item->productCode .'-'. $order->desciption;
+                continue;
             }
-            $line = B30AccDocSales2::setData($i, $item, $customer, $itemInfo, $warehouse, $acc->Stt,$itemAccInfo);
-            B30AccDocSales2::create($line);
+            $listAccDocSale2[]=B30AccDocSales2::setData($i, $item, $customer, $itemInfo, $warehouse, $itemAccInfo);
             $i++;
+        }
+        $acc = B30AccDocSales::create($data);
+        $acc = B30AccDocSales::find($acc->Id);
+        foreach($listAccDocSale2 as $sale){
+            $sale["Stt"] = $acc->Stt;
+            B30AccDocSales2::create($sale);
         }
         B30AccDocSales::runExec($acc);
         return response("true", 200);
     }
+
+
+
+
+
+
     private function procedureUpdateOrder($speed)
     {
         B30AccDocSales::where('DocNo', 'HDN' . $speed->orderId)->update(['DocStatus' => B30AccDocSales::convertStatus(($speed->status))]);
         $acc = B30AccDocSales::where('DocNo', 'HDN' . $speed->orderId)->get();
-        foreach ($acc as $item) {
-            B30AccDocSales::runExec($item);
-        }
+        B30AccDocSales::runExec($acc);
         return response("true", 200);
+    }
+}
+
+class Coin {
+    function __construct($order) {
+        $this->usedPoints = $order->usedPoints;
+        $this->moneyDiscountPercent = $order->usedPoints / ($order->calcTotalMoney + $order->moneyDiscount + $order->usedPoints);
+        $this->allotted = 0;
+    }
+    private $usedPoints;
+    private $moneyDiscountPercent;
+    private $allotted ;
+    public function getCoin(bool $endOfList,$price){
+        if ($endOfList)  return $this->usedPoints- $this->allotted;
+            $coin = (int)($price * $this->moneyDiscountPercent);
+            $this->allotted = $this->allotted + $coin;
+            return $coin;
     }
 }

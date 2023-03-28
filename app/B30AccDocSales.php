@@ -54,7 +54,7 @@ class B30AccDocSales extends Model
             'TotalOriginalAmount'=>$order->calcTotalMoney,
 
             'TransCode' => '2301',
-            'Description' => "Đơn lên từ nhanh.vn",
+            'Description' => "Đơn lên từ nhanh.vn".$order->description,
             'CurrencyCode' => 'VND',
             'DiscountRate' => 0,
             'ExchangeRate' => '1',

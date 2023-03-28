@@ -45,10 +45,17 @@ class SpeedService
     public function getOrderDetail($id)
     {
         $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
-        $data = $this->getBody("{\"id\":".$id."}");
+        $data = $this->getBody("{\"id\":".$id.",\"dataOptions\":[\"giftProducts\"]}");
         $response = Api::post('https://open.nhanh.vn/api/order/index', $headers, $data);
         return $response->body;
 
+    }
+    public function getWarehousing($id)
+    {
+        $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
+        $data = $this->getBody("{}");
+        $response = Api::post('https://open.nhanh.vn/api/bill/search', $headers, $data);
+        return $response->body;
     }
 
     public function getCustomersPoint()
