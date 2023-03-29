@@ -40,7 +40,7 @@ class B30AccDocSales2 extends Model
             'CreditAccount2'=>$itemAccInfo->DebitAccount2,
             'DebitAccount2'=>'5212',
             'CreditAccount'=>'632',
-            'DebitAccount'=>$warehouse->Name2?$warehouse->Name20:'1561',
+            'DebitAccount'=>$warehouse->Name2?$warehouse->Name2:'1561',
             'DebitAccount3'=>'',
             'CreditAccount3'=>'',
             'Amount3'=>0,

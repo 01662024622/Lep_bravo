@@ -13,7 +13,7 @@ class B30AccDocItem2 extends Model
     protected $primaryKey ='Id';
     protected $table = "B30AccDocItem2";
     public $timestamps = false;
-    public static function setData($index,$item, $itemInfo, $warehouse,$Stt): array
+    public static function setData($index,$item, $itemInfo, $warehouse,$account): array
     {
         return  [
             'DocDate' => Carbon::today()->format('Y-m-d'),
@@ -30,8 +30,8 @@ class B30AccDocItem2 extends Model
             'OriginalAmount9'=>$item->money,
             'Amount9'=>$item->money,
 
-            'DebitAccount'=>'15611', //=>$warehouse?$warehouse->ClassCode1:''
-            'CreditAccount'=>'15611', //632
+            'DebitAccount'=>$account, //=>$warehouse?$warehouse->ClassCode1:''
+            'CreditAccount'=>$warehouse?$warehouse->Name2:'', //632
 
             'WarehouseId'=>$warehouse?$warehouse->Id:0,
             'TransCode '=>'2107',

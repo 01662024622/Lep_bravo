@@ -44,17 +44,16 @@ class B30AccDocSales extends Model
 
             'TotalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney,
             'TotalAmount4'=>$order->moneyDiscount,
-            'TotalAmountDl'=> $order->shipFee,
+            'TotalAmountDl'=> $order->customerShipFee,
             'TotalAmount41'=> $order->usedPoints,
             'TotalAmount'=>$order->calcTotalMoney,
             'TotalOriginalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney,
             'TotalOriginalAmount4'=>$order->moneyDiscount,
-            'TotalOriginalAmountDl'=>$order->shipFee,
+            'TotalOriginalAmountDl'=>$order->customerShipFee,
             'TotalOriginalAmount41'=> $order->usedPoints,
             'TotalOriginalAmount'=>$order->calcTotalMoney,
 
             'TransCode' => '2301',
-            'Description' => "Đơn lên từ nhanh.vn".$order->description,
             'CurrencyCode' => 'VND',
             'DiscountRate' => 0,
             'ExchangeRate' => '1',
@@ -87,11 +86,11 @@ class B30AccDocSales extends Model
 
             'TotalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney*-1,
             'TotalAmount4'=>$order->moneyDiscount,
-            'TotalAmountDl'=> $order->shipFee,
+            'TotalAmountDl'=> $order->customerShipFee,
             'TotalAmount'=>$order->calcTotalMoney*-1,
             'TotalOriginalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney*-1,
             'TotalOriginalAmount4'=>$order->moneyDiscount,
-            'TotalOriginalAmountDl'=>$order->shipFee,
+            'TotalOriginalAmountDl'=>$order->customerShipFee,
             'TotalOriginalAmount'=>$order->calcTotalMoney*-1,
 
             'TransCode' => '2107',

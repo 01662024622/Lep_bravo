@@ -37,7 +37,7 @@ class B30AccDocItem extends Model
             'TotalOriginalAmount'=>$order->money,
 
             'TransCode' => $order->type==1?'2100':'2211',
-            'Description' => "Đơn lên từ nhanh.vn-".$description,
+            'Description' => $description,
             'CurrencyCode' => 'VND',
             'DiscountRate' => 0,
             'ExchangeRate' => '1',
