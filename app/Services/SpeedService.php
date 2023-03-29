@@ -50,10 +50,10 @@ class SpeedService
         return $response->body;
 
     }
-    public function getWarehousing($id)
+    public function getWarehousing()
     {
         $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
-        $data = $this->getBody("{}");
+        $data = $this->getBody("{\"modes\":[3,5,8]}");
         $response = Api::post('https://open.nhanh.vn/api/bill/search', $headers, $data);
         return $response->body;
     }

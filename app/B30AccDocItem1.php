@@ -13,10 +13,9 @@ class B30AccDocItem1 extends Model
     protected $primaryKey ='Id';
     protected $table = "B30AccDocItem1";
     public $timestamps = false;
-    public static function setData($index,$item, $itemInfo, $warehouse,$Stt): array
+    public static function setData($index,$item, $itemInfo, $warehouse): array
     {
         return  [
-            'Stt'=>$Stt,
             'DocDate' => Carbon::today()->format('Y-m-d'),
             'BuiltinOrder' => $index,
             'ItemId' => $itemInfo->Id,

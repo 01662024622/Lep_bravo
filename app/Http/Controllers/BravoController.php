@@ -27,13 +27,14 @@ class BravoController extends Controller
 
     public function get()
     {
-        B20Customer::create(['Code' => 'HH00192319', 'ParentId' => 18104192, 'Name' => 'thangvm', 'CustomerType' => 0, 'Tel' => '0362024622']);
+        $a= 1;
+        $b=2;
+        $c=$a+$b;
         return response("true", 200);
     }
     public function create(Request $request)
     {
 
-        $data = $this->SpeedService->getWarehousing()->data->bill;
 
         $speed = json_decode(json_encode($request->only(["event", "webhooksVerifyToken", "data"])), FALSE);
 
@@ -55,7 +56,7 @@ class BravoController extends Controller
         }
         if ($speed->event == "inventoryChange") {
             $speed = $speed->data;
-            return $this->procedureChange($speed);
+            return $this->procedureChange();
         }
         $speed = $speed->data;
         return $this->procedureInventory($speed);
@@ -81,6 +82,7 @@ class BravoController extends Controller
 
     private function procedureAddOrder($speed)
     {
+        
         //detail order
         $orders = $this->SpeedService->getOrderDetail($speed->orderId);
         if (!property_exists($orders, "data")) return response("true", 200);
@@ -101,49 +103,71 @@ class BravoController extends Controller
 
 
 
-    private function procedureChange($order)
+    private function procedureChange()
     {
-        foreach ($order->bill as $i) {
-            $order = $i;
-            break;
-        }
-        // detail from bravo
-        $warehouse = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
-        $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
-        $description = "";
-        if ($order->mode == 3) {
-            $description = "Chuyển kho";
-        }
-        if ($order->mode == 5) {
-            $description = "Nhà cung cấp";
-        }
-        $data = B30AccDocItem::setData($order, $employeeid, $description);
-        $acc = B30AccDocItem::create($data);
-        $acc = B30AccDocItem::find($acc->Id);
-        $i = 1;
-        if ($order->type == 1) {
-            foreach ($order->products as $item) {
-                $itemInfo = B20Item::where("Code", $item->code)->get();
-                if (sizeof($itemInfo) > 0) {
-                    $itemInfo = $itemInfo[0];
+        $data = $this->SpeedService->getWarehousing()->data->bill;
+        foreach ($data as $order) {
+            $check = B30AccDocItem::where("DocNo", $order->type==1?'NKN' . $order->id:'XKN' . $order->id)->get();
+            if(sizeof($check>0)) continue;
+            $description = "";
+            if ($order->mode == 3) {
+                $description = $order->description==""?"Chuyển kho":"Chuyển kho"."-".$order->description;
+            }else
+            if ($order->mode == 5) {
+                $description =$order->description==""?"Nhà cung cấp":"Nhà cung cấp"."-".$order->description;
+            }elseif ($order->mode == 8) {
+                $description = $order->description==""?"Kiểm kho":"Kiểm kho"."-".$order->description;
+            }else continue;
+            // detail from bravo
+            $warehouse = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
+            $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
+            $i = 1;
+            $accDocItem1=[];
+            $accDocItem2=[];
+            if ($order->type == 1) {
+                foreach ($order->products as $item) {
+                    $itemInfo = B20Item::getItemByCode($item->code);
+                    if ($itemInfo==null) {
+                        $description = $item->productCode .'-'. $description;
+                        continue;
+                    }
+                    
+                    $accDocItem1[]= B30AccDocItem1::setData($i, $item, $itemInfo, $warehouse);
+                    B30AccDocItem1::create($line);
+                    $i++;
                 }
-                $line = B30AccDocItem1::setData($i, $item, $itemInfo, $warehouse, $acc->Stt);
-                B30AccDocItem1::create($line);
-                $i++;
             }
-        }
-        if ($order->type == 2) {
-            foreach ($order->products as $item) {
-                $itemInfo = B20Item::where("Code", $item->code)->get();
-                if (sizeof($itemInfo) > 0) {
-                    $itemInfo = $itemInfo[0];
+            if ($order->type == 2) {
+                foreach ($order->products as $item) {
+                    $itemInfo = B20Item::getItemByCode($item->code);
+                    if ($itemInfo==null) {
+                        $description = $item->productCode .'-'. $description;
+                        continue;
+                    }
+                    
+                    $accDocItem2[]= B30AccDocItem2::setData($i, $item, $itemInfo, $warehouse);
+                    B30AccDocItem2::create($line);
+                    $i++;
                 }
-                $line = B30AccDocItem2::setData($i, $item, $itemInfo, $warehouse, $acc->Stt);
-                B30AccDocItem2::create($line);
-                $i++;
             }
+            $acc= B30AccDocItem::setData($order, $employeeid, $description);
+            $acc = B30AccDocItem::create($data);
+            $acc = B30AccDocItem::find($acc->Id);
+            if($order->type==1){
+                foreach($accDocItem1 as $sale){
+                    $sale["Stt"] = $acc->Stt;
+                    B30AccDocItem1::create($sale);
+                }
+            }
+            if($order->type==2){
+                foreach($accDocItem2 as $sale){
+                    $sale["Stt"] = $acc->Stt;
+                    B30AccDocItem2::create($sale);
+                }
+            }
+            B30AccDocSales::runExec($acc);
+        
         }
-        B30AccDocSales::runExec($acc);
         return response("true", 200);
     }
 

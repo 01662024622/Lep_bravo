@@ -16,7 +16,6 @@ class B30AccDocItem2 extends Model
     public static function setData($index,$item, $itemInfo, $warehouse,$Stt): array
     {
         return  [
-            'Stt'=>$Stt,
             'DocDate' => Carbon::today()->format('Y-m-d'),
             'BuiltinOrder' => $index,
             'ItemId' => $itemInfo->Id,
