@@ -58,8 +58,7 @@ class BravoController extends Controller
             $speed = $speed->data;
             return $this->procedureChange();
         }
-        $speed = $speed->data;
-        return $this->procedureInventory($speed);
+        return response("true", 200);
     }
 
 
