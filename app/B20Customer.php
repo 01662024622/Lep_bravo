@@ -28,6 +28,10 @@ class B20Customer extends Model
                 'BillingAddress' => $address,
                 'Tel' => $order->customerMobile
             ]);
+            $customer = B20Customer::where('Code', $order->customerMobile)->get();
+                if (sizeof($customer) > 0) {
+                    $customer = $customer[0];
+                }
         }
         return $customer;
     }

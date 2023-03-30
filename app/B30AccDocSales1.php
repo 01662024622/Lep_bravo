@@ -47,7 +47,7 @@ class B30AccDocSales1 extends Model
             'DebitAccount2'=>$warehouse?$warehouse->ClassCode2:'131',  //5212
             'CreditAccount2'=>'5111', // $warehouse?$warehouse->ClassCode2:'131'
             'DebitAccount'=>'632', //=>$warehouse?$warehouse->ClassCode1:''
-            'CreditAccount'=>$warehouse?$warehouse->ClassCode1:'', //632
+            'CreditAccount'=>$warehouse?$warehouse->Name2:'', //632
             'DebitAccount3'=>'',
             'CreditAccount3'=>'',
             'Amount3'=>0,

@@ -107,11 +107,14 @@ class BravoController extends Controller
     {
         $data = $this->SpeedService->getWarehousing()->data->bill;
         foreach ($data as $order) {
+
             $check = B30AccDocItem::where("DocNo", $order->type==1?'NKN' . $order->id:'XKN' . $order->id)->get();
             if(sizeof($check)>0) continue;
             $description1 = "";
             $account = "";
             if ($order->mode == 2) {
+
+                $check = B30AccDocSales::where("DocNo", 'HDN' . $order->id)->get();
                 $order->moneyDiscount =$order->discount;
                 $order->customerAddress = "";
                 $order->customerWard = "";
@@ -127,6 +130,7 @@ class BravoController extends Controller
                 $order->type==1?
                 $this->procedureAddOrderRefund($order):
                 $this->procedureAddOrderReal($order);
+
                 continue;
             }else
             if ($order->mode == 3) {

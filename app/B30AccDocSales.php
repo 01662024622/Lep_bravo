@@ -84,14 +84,14 @@ class B30AccDocSales extends Model
             'CreditAccountDl' => $warehouse?$warehouse->ClassCode2:'',
             'PlateNumber' => $order->couponCode?$order->couponCode:'',
 
-            'TotalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney*-1,
+            'TotalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney,
             'TotalAmount4'=>$order->moneyDiscount,
             'TotalAmountDl'=> $order->customerShipFee,
-            'TotalAmount'=>$order->calcTotalMoney*-1,
-            'TotalOriginalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney*-1,
+            'TotalAmount'=>$order->calcTotalMoney,
+            'TotalOriginalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney,
             'TotalOriginalAmount4'=>$order->moneyDiscount,
             'TotalOriginalAmountDl'=>$order->customerShipFee,
-            'TotalOriginalAmount'=>$order->calcTotalMoney*-1,
+            'TotalOriginalAmount'=>$order->calcTotalMoney,
 
             'TransCode' => '2107',
             'Description' => "Đơn lên từ nhanh.vn",
