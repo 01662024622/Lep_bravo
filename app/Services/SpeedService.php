@@ -53,7 +53,7 @@ class SpeedService
     public function getWarehousing()
     {
         $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
-        $data = $this->getBody("{\"modes\":[2,3,5,8]}");
+        $data = $this->getBody("{\"modes\":[2,4]}"); // 2 lẻ 3 là chuyển kho 4 là quà tặng kèm 5 nhà cung cấp 8 kiểm kho
         $response = Api::post('https://open.nhanh.vn/api/bill/search', $headers, $data);
         return $response->body;
     }

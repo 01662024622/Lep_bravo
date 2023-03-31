@@ -22,7 +22,7 @@ class B30AccDocSales extends Model
     protected $primaryKey = 'Id';
     protected $table = "B30AccDocSales";
     public $timestamps = false;
-    public static function setData($order, $customer, $employeeid, $warehouse): array
+    public static function setData($order, $customer, $employeeid, $warehouses): array
     {
 
         $address = $order->customerAddress . "-" . $order->customerWard . "-" . $order->customerDistrict . "-" . $order->customerCity;
@@ -37,9 +37,9 @@ class B30AccDocSales extends Model
             'DebitAccountMk' => '',
             'DebitAccountFl' =>'',
             'DebitAccountDl' => '',
-            'CreditAccountMk' => $warehouse?$warehouse->ClassCode2:'',
-            'CreditAccountFL' => $warehouse?$warehouse->ClassCode2:'',
-            'CreditAccountDl' => $warehouse?$warehouse->ClassCode2:'',
+            'CreditAccountMk' => $warehouses?$warehouses->HH->ClassCode2:'',
+            'CreditAccountFL' => $warehouses?$warehouses->HH->ClassCode2:'',
+            'CreditAccountDl' => $warehouses?$warehouses->HH->ClassCode2:'',
             'PlateNumber' => $order->couponCode?$order->couponCode:'',
 
             'TotalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney,
@@ -64,7 +64,7 @@ class B30AccDocSales extends Model
             'DocCode' => 'H2'
         ];
     }
-    public static function setDataRefund($order, $customer, $employeeid, $warehouse): array
+    public static function setDataRefund($order, $customer, $employeeid, $warehouses): array
     {
 
         $address = $order->customerAddress . "-" . $order->customerWard . "-" . $order->customerDistrict . "-" . $order->customerCity;
@@ -79,9 +79,9 @@ class B30AccDocSales extends Model
             'DebitAccountMk' => '',
             'DebitAccountFl' =>'',
             'DebitAccountDl' => '',
-            'CreditAccountMk' => $warehouse?$warehouse->ClassCode2:'',
-            'CreditAccountFL' => $warehouse?$warehouse->ClassCode2:'',
-            'CreditAccountDl' => $warehouse?$warehouse->ClassCode2:'',
+            'CreditAccountMk' => $warehouses?$warehouses->HH->ClassCode2:'',
+            'CreditAccountFL' => $warehouses?$warehouses->HH->ClassCode2:'',
+            'CreditAccountDl' => $warehouses?$warehouses->HH->ClassCode2:'',
             'PlateNumber' => $order->couponCode?$order->couponCode:'',
 
             'TotalAmount0'=>$order->moneyDiscount+$order->calcTotalMoney,

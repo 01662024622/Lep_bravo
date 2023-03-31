@@ -24,7 +24,8 @@ class B30AccDocSales1 extends Model
             }
         return null;
     }
-    public static function setData($index,$item, $customer, $itemInfo, $warehouse): array
+
+    public static function setData($index,$item, $customer, $itemInfo, $warehouses): array
     {
         return  [
             'DocDate' => Carbon::today()->format('Y-m-d'),
@@ -44,10 +45,10 @@ class B30AccDocSales1 extends Model
             'OriginalAmount2'=>$item->price*$item->quantity,
             'Amount2'=>$item->price*$item->quantity,
 
-            'DebitAccount2'=>$warehouse?$warehouse->ClassCode2:'131',  //5212
+            'DebitAccount2'=>$warehouses?$warehouses->HH->ClassCode2:'131',  //5212
             'CreditAccount2'=>'5111', // $warehouse?$warehouse->ClassCode2:'131'
             'DebitAccount'=>'632', //=>$warehouse?$warehouse->ClassCode1:''
-            'CreditAccount'=>$warehouse?$warehouse->Name2:'', //632
+            'CreditAccount'=>$itemInfo->ItemType == "1" ? ($warehouses ? $warehouses->TP->Name2 : "1561") : ($warehouses ? $warehouses->HH->Name2 : "1561"),
             'DebitAccount3'=>'',
             'CreditAccount3'=>'',
             'Amount3'=>0,
@@ -61,7 +62,7 @@ class B30AccDocSales1 extends Model
             'Amount41'=>$item->usedPoints,
             'OriginalAmount41'=>$item->usedPoints,
 
-            'WarehouseId'=>$warehouse?$warehouse->Id:0,
+            'WarehouseId'=> $itemInfo->ItemType == "1" ? ($warehouses ? $warehouses->TP->Id : 0) : ($warehouses ? $warehouses->HH->Id : 0),
 
             'Gia_Tb_Tt' => '1',
             'CreatedBy' => 4,

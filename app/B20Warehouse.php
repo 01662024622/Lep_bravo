@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use stdClass;
 
 class B20Warehouse extends Model
 {
@@ -14,12 +15,20 @@ class B20Warehouse extends Model
 
     public static function getWarehouse(int $id)
     {
-
-        $warehouse = B20Warehouse::where('ClassCode1', (string) $id)->get();
+        $warehouses=new stdClass();
+        $warehouse = B20Warehouse::where('ClassCode1', "HH-".$id)->get();
         if (sizeof($warehouse) > 0) {
-            $warehouse = $warehouse[0];
-            return $warehouse;
+            $warehouses->HH = $warehouse[0];
+        }else{
+            return null;
         }
-        return null;
+        $warehouse = B20Warehouse::where('ClassCode1', "TP-".$id)->get();
+        if (sizeof($warehouse) > 0) {
+            $warehouses->TP = $warehouse[0];
+        }else{
+            return null;
+        }
+
+        return $warehouses;
     }
 }
