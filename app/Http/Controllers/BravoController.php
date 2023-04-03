@@ -6,9 +6,13 @@ use App\B20Customer;
 use App\B20Employee;
 use App\B20Item;
 use App\B20Warehouse;
+use App\B30AccDoc;
+use App\B30AccDocAtchDoc;
 use App\B30AccDocItem;
 use App\B30AccDocItem1;
 use App\B30AccDocItem2;
+use App\B30AccDocOther;
+use App\B30AccDocPrepay;
 use App\B30AccDocSales;
 use App\B30AccDocSales1;
 use App\B30AccDocSales2;
@@ -55,8 +59,11 @@ class BravoController extends Controller
             return $this->procedureUpdateOrder($speed);
         }
         if ($speed->event == "inventoryChange") {
-            $speed = $speed->data;
             return $this->procedureChange();
+        }
+        if ($speed->event == "orderDelete") {
+            $speed = $speed->data;
+            return $this->procedureDeleteOrder($speed);
         }
         return response("true", 200);
     }
@@ -120,6 +127,7 @@ class BravoController extends Controller
                 $order->statusCode = "Success";
                 $order->customerShipFee = 0;
                 $order->returnFromOrderId = property_exists($order, 'relatedBillId') ? $order->relatedBillId : 0;
+                $order->returnFromOrderId = property_exists($order, 'orderId')&& ($order->returnFromOrderId==''|| $order->returnFromOrderId==0)? $order->orderId : 0;
                 $order->usedPoints = (int)(property_exists($order, 'usedPoints') ? $order->usedPoints : 0);
                 $order->discount = (int)(property_exists($order, 'discount') ? $order->discount : 0);
                 $order->calcTotalMoney = $order->money - $order->usedPoints;
@@ -185,14 +193,17 @@ class BravoController extends Controller
                     $sale["Stt"] = $acc->Stt;
                     B30AccDocItem1::create($sale);
                 }
+
+                B30AccDocSales::runExec($acc, 'PN');
             }
             if ($order->type == 2) {
                 foreach ($accDocItem2 as $sale) {
                     $sale["Stt"] = $acc->Stt;
                     B30AccDocItem2::create($sale);
                 }
+
+                B30AccDocSales::runExec($acc, 'PX');
             }
-            B30AccDocSales::runExec($acc);
         }
         return response("true", 200);
     }
@@ -209,6 +220,8 @@ class BravoController extends Controller
         if (sizeof($check) > 0) return response("true", 200);
         // detail from bravo
         $customer = B20Customer::getCustomer($order);
+        $this->getCustomerLevelId($order->customerId, $customer);
+
         $warehouses = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
         $order->usedPoints = $order->usedPoints ? $order->usedPoints : 0;
@@ -267,7 +280,9 @@ class BravoController extends Controller
             $sale["Stt"] = $acc->Stt;
             B30AccDocSales1::create($sale);
         }
+        B30AccDocAtchDoc::create(B30AccDocAtchDoc::setData($order, $customer, $warehouses, $acc->Stt));
         B30AccDocSales::runExec($acc);
+
         return response("true", 200);
     }
 
@@ -281,15 +296,22 @@ class BravoController extends Controller
         if (sizeof($check) > 0) return response("true", 200);
         // detail from bravo
         $customer = B20Customer::getCustomer($order);
+        $this->getCustomerLevelId($order->customerId, $customer);
         $warehouses = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
         $order->moneyDiscount = $order->moneyDiscount ? $order->moneyDiscount : 0;
         $data = B30AccDocSales::setDataRefund($order, $customer, $employeeid, $warehouses);
 
-        $accSale = B30AccDocSales::where("DocNo", "HDN" . $order->returnFromOrderId)->get();
-        sizeof($accSale) > 0 ? $accSale = $accSale[0]->Stt : null;
+        $accSales = B30AccDocSales::where("DocNo", "HDN" . $order->returnFromOrderId)->get();
+        $accSale=0;
+        if(sizeof($accSales) > 0){
+            $accSale = $accSales[0]->Stt;
+            $accSales = $accSales[0];
+        }
         $i = 1;
         $listAccDocSale2 = [];
+        $debitAcount = "1315";
+        $creditAcount = $warehouses ? $warehouses->HH->ClassCode2 : '1311';
         foreach ($order->products as $item) {
             $item = json_decode(json_encode($item), FALSE);
             if ($type == 2) {
@@ -307,16 +329,48 @@ class BravoController extends Controller
                 $order->desciption = $item->productCode . '-' . $order->desciption;
                 continue;
             }
+            if($debitAcount=="") $debitAcount = $itemAccInfo->DebitAccount2;
             $listAccDocSale2[] = B30AccDocSales2::setData($i, $item, $customer, $itemInfo, $warehouses, $itemAccInfo);
             $i++;
+            if (property_exists($item, "giftProducts")) {
+                if (sizeof($item->giftProducts) > 0) {
+                    foreach ($item->giftProducts as $gifts) {
+                        foreach ($gifts as $gift) {
+                            $giftInfo = B20Item::getItemByCode($gift->productCode);
+                            if ($giftInfo == null) {
+                                $order->desciption = $item->productCode . '-' . $order->desciption;
+                                continue;
+                            }
+                            $gift->price = 0;
+                            $gift->usedPoints = 0;
+                            $gift->discount = 0;
+                            $gift->quantity = $gift->productQuantity;
+
+                            $itemAccInfog = B30AccDocSales1::getItemByStt($accSale, $giftInfo->Id);
+                            $listAccDocSale2[] = B30AccDocSales2::setData($i, $gift, $customer, $giftInfo, $warehouses,$itemAccInfog);
+                            $i++;
+                        }
+                    }
+                }
+            }
         }
         $acc = B30AccDocSales::create($data);
         $acc = B30AccDocSales::find($acc->Id);
+        $Stt = $acc->Stt;
         foreach ($listAccDocSale2 as $sale) {
-            $sale["Stt"] = $acc->Stt;
+            $sale["Stt"] = $Stt;
             B30AccDocSales2::create($sale);
         }
-        B30AccDocSales::runExec($acc);
+        B30AccDocSales::runExec($acc,"TL");
+
+        // bù trừ công nợ
+        if($debitAcount!=$creditAcount){
+            $btn= B30AccDoc::setData($order);
+            $btnm = B30AccDoc::create($btn);
+            $btnm= B30AccDoc::find($btnm->Id);
+            B30AccDocOther::create(B30AccDocOther::setData($accSales,$acc,$debitAcount,$creditAcount,$btnm->Stt));
+            B30AccDocSales::runExec($btnm,"BT");
+        }
         return response("true", 200);
     }
 
@@ -326,7 +380,7 @@ class BravoController extends Controller
     {
         $acc = B30AccDocSales::where('DocNo', $order->type == 1 ? 'TLN' . $order->relatedBillId : 'HDN' . $order->relatedBillId)->get();
         if (!(sizeof($acc) > 0)) return;
-        $acc= $acc[0];
+        $acc = $acc[0];
         $warehouses = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
         $customer = B20Customer::getCustomer($order);
         if ($order->type == 1) {
@@ -350,9 +404,9 @@ class BravoController extends Controller
                 $accSale1 = B30AccDocSales1::where("Stt", $accSale1->Stt)->where("ItemId", $giftInfo->Id)->get();
                 if (!(sizeof($accSale1) > 0)) continue;
                 $accSale1 = $accSale1[0];
-                $gift->price=0;
-                $gift->usedPoints=0;
-                $gift->discount=0;
+                $gift->price = 0;
+                $gift->usedPoints = 0;
+                $gift->discount = 0;
                 $sale = B30AccDocSales2::setData($i, $gift, $customer, $giftInfo, $warehouses, $accSale1);
                 $sale["Stt"] = $acc->Stt;
                 B30AccDocSales2::create($sale);
@@ -368,9 +422,9 @@ class BravoController extends Controller
                 if ($itemAccInfo != null) continue;
                 $i = B30AccDocSales1::where("Stt", $acc->Stt)->count();
 
-                $gift->price=0;
-                $gift->usedPoints=0;
-                $gift->discount=0;
+                $gift->price = 0;
+                $gift->usedPoints = 0;
+                $gift->discount = 0;
                 $sale = B30AccDocSales1::setData($i + 1, $gift, $customer, $giftInfo, $warehouses);
                 $sale["Stt"] = $acc->Stt;
                 B30AccDocSales1::create($sale);
@@ -383,10 +437,109 @@ class BravoController extends Controller
     private function procedureUpdateOrder($speed)
     {
 
-        B30AccDocSales::where('DocNo', 'HDN' . $speed->orderId)->update(['DocStatus' => B30AccDocSales::convertStatus(($speed->status))]);
-        $acc = B30AccDocSales::where('DocNo', 'HDN' . $speed->orderId)->get();
-        B30AccDocSales::runExec($acc);
+        $orders = $this->SpeedService->getOrderDetail($speed->orderId);
+        if (!property_exists($orders, "data")) return response("true", 200);
+        $orders = $orders->data->orders;
+        $order = null;
+        foreach ($orders as $i) {
+            $order = $i;
+            break;
+        }
+        if ($order->typeId == 1) {
+            $olderOrder = B30AccDocSales::where("DocNo", 'HDN' . $speed->orderId)->get();
+            foreach ($olderOrder as $i) {
+                $olderOrder = $i;
+                break;
+            }
+            if ($olderOrder->TotalAmount != $order->calcTotalMoney) {
+                B30AccDocSales::where("DocNo", 'HDN' . $speed->orderId)->delete();
+                B30AccDocSales::runExec($olderOrder);
+                return $this->procedureAddOrderReal($order, 1);
+            }
+
+            $accDocSales = B30AccDocSales1::where("Stt", $olderOrder->Stt)->get();
+            foreach ($order->products as $p) {
+                $olderOrderSale = B20Item::where("Code", $p->productCode)->get();
+                foreach ($olderOrderSale as $j) {
+                    foreach ($accDocSales as $accDocSale) {
+                        if ($accDocSale->ItemId == $j->Id && $accDocSale->Quantity != $p->quantity) {
+                            B30AccDocSales::where("DocNo", 'HDN' . $speed->orderId)->delete();
+                            B30AccDocSales::runExec($olderOrder);
+                            return $this->procedureAddOrderReal($order, 1);
+                        }
+                    }
+                    break;
+                }
+            }
+            B30AccDocSales::where('DocNo', 'HDN' . $speed->orderId)->update(['DocStatus' => B30AccDocSales::convertStatus(($speed->status))]);
+            $acc = B30AccDocSales::where('DocNo', 'HDN' . $speed->orderId)->get();
+            foreach ($acc as $i) {
+                $acc = $i;
+                break;
+            }
+            B30AccDocSales::runExec($acc);
+            return response("true", 200);
+        } else if ($order->typeId == 14) {
+            $olderOrder = B30AccDocSales::where("DocNo", 'TLN' . $speed->orderId)->get();
+            foreach ($olderOrder as $i) {
+                $olderOrder = $i;
+                break;
+            }
+            if ($olderOrder->TotalAmount != $order->calcTotalMoney) {
+                B30AccDocSales::where("DocNo", 'TLN' . $speed->orderId)->delete();
+                B30AccDocSales::runExec($olderOrder);
+                return $this->procedureAddOrderRefund($order, 1);
+            }
+
+            $accDocSales = B30AccDocSales2::where("Stt", $olderOrder->Stt)->get();
+            foreach ($order->products as $p) {
+                $olderOrderSale = B20Item::where("Code", $p->productCode)->get();
+                foreach ($olderOrderSale as $j) {
+                    foreach ($accDocSales as $accDocSale) {
+
+                        if ($accDocSale->ItemId == $j->Id && $accDocSale->Quantity != $p->quantity){
+                            B30AccDocSales::where("DocNo", 'TLN' . $speed->orderId)->delete();
+                            B30AccDocSales::runExec($olderOrder);
+                            return $this->procedureAddOrderRefund($order, 1);
+                        }
+                    }
+                    break;
+                }
+            }
+            return response("true", 200);
+        }
+    }
+    private function procedureDeleteOrder($speed)
+    {
+        foreach ($speed as $orderId) {
+
+            $accs = B30AccDocSales::where("DocNo", 'TLN' . $orderId)->orWhere("DocNo", 'HDN' . $orderId)->get();
+            B30AccDocSales::where("DocNo", 'TLN' . $orderId)->orWhere("DocNo", 'HDN' . $orderId)->update(['DocStatus' => 15]);
+            foreach($accs as $acc) B30AccDocSales::runExec($acc);
+
+        }
         return response("true", 200);
+    }
+    private function getCustomerLevelId($id, $customer)
+    {
+        $customerSpeeds = $this->SpeedService->getCustomerDetail($id);
+
+        if (!property_exists($customerSpeeds, "data")) return;
+        $customerSpeeds = $customerSpeeds->data->customers;
+        foreach ($customerSpeeds as $i) {
+            $customer->update(['ParentId' => $this->convertParentId(12)]);
+        }
+    }
+    private function convertParentId($id): int
+    {
+        switch ($id) {
+            case 11:
+                return 12;
+            case 12:
+                return 13;
+            default:
+                return 11;
+        }
     }
 }
 

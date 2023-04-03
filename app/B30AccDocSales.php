@@ -134,15 +134,17 @@ class B30AccDocSales extends Model
         }
     }
 
-    public static function runExec($acc){
-        DB::statement("use B8R3_AuCouture_TT_QT;EXECUTE dbo.usp_B30AccDoc_Post
+    public static function runExec($acc,$code=''){
+        if(!property_exists($acc, 'DocStatus')) {$acc->DocStatus=4;}
+        $sql ="use B8R3_AuCouture_TT_QT;EXECUTE dbo.usp_B30AccDoc_Post
         @_BranchCode = 'A01',
-        @_Stt = ".$acc->Stt.",
+        @_Stt = '".$acc->Stt."',
         @_DocDate = '".Carbon::today()->format('Y-m-d')."',
-        @_DocCode = 'HD',
-        @_DocStatus = $acc->DocStatus,
+        @_DocCode ='". ($code!=''?$code:'H2')."',
+        @_DocStatus = ". $acc->DocStatus .",
         @_UpdateType = NULL,
         @_RelationSttListNotUpdate = 1,
-        @_FiscalYear = ".Carbon::today()->format('Y')."");
+        @_FiscalYear = ".Carbon::today()->format('Y')."";
+        DB::statement($sql);
     }
 }

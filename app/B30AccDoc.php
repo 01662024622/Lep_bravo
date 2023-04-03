@@ -27,14 +27,14 @@ class B30AccDoc extends Model
 
         return [
             'DocNo' => 'BTN' . $order->id,
-            'TotalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney,
+            'TotalAmount0'=>$order->calcTotalMoney,
             'TotalOriginalAmount'=>$order->calcTotalMoney,
             'TotalAmount'=>$order->calcTotalMoney,
-            'TotalOriginalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney,
+            'TotalOriginalAmount0'=>$order->calcTotalMoney,
 
             'PostGeneralLedger' => 1,
             'PostStockLedger' => 1,
-            'Posted' => 4,
+            'Posted' => 1,
             'DocStatus' => 4,
             'Ma_Nvu' => 'K',
 
