@@ -12,8 +12,8 @@ class B30AccDocSales1 extends Model
         'Unit', 'Quantity', 'ConvertRate9', 'Quantity9', 'OriginalUnitPrice', 'UnitPrice', 'OriginalAmount9',
          'Amount9', 'OriginalAmount2', 'Amount2',
           'DebitAccount2', 'CreditAccount2', 'DebitAccount', 'CreditAccount', 'DebitAccount3',
-           'Amount3', 'OriginalAmount3', 'Amount4', 'OriginalAmount4', 'DiscountRate', 'DebitAccount4',
-            'OriginalAmount41', 'Amount41', 'DebitAccount41', 'CreatedBy', 'Gia_Tb_Tt', 'WarehouseId'];
+           'Amount3', 'OriginalAmount3', 'Amount4', 'OriginalAmount4', 'DiscountRate', 'DebitAccount4','CreditAccount4','CreditAccount41',
+            'OriginalAmount41', 'Amount41', 'DebitAccount41', 'CreatedBy', 'Gia_Tb_Tt', 'WarehouseId','DeptId'];
     protected $primaryKey ='Id';
     protected $table = "B30AccDocSales1";
     public $timestamps = false;
@@ -45,7 +45,10 @@ class B30AccDocSales1 extends Model
             'OriginalAmount2'=>$item->price*$item->quantity,
             'Amount2'=>$item->price*$item->quantity,
 
+            'DeptId' => $warehouses ? $warehouses->HH->ClassCode3 : '20354472',
             'DebitAccount2'=>$warehouses?$warehouses->HH->ClassCode2:'131',  //5212
+            'CreditAccount4'=>$warehouses?$warehouses->HH->ClassCode2:'131',  //5212
+            'CreditAccount41'=>$warehouses?$warehouses->HH->ClassCode2:'131',  //5212
             'CreditAccount2'=>'5111', // $warehouse?$warehouse->ClassCode2:'131'
             'DebitAccount'=>'632', //=>$warehouse?$warehouse->ClassCode1:''
             'CreditAccount'=>$itemInfo->ItemType == "1" ? ($warehouses ? $warehouses->TP->Name2 : "1561") : ($warehouses ? $warehouses->HH->Name2 : "1561"),
@@ -58,7 +61,7 @@ class B30AccDocSales1 extends Model
 
             'Amount4'=>$item->discount*$item->quantity,
             'OriginalAmount4'=>$item->discount*$item->quantity,
-            'DiscountRate'=>$item->price==0||$item->quantity==0?0:$item->discount/($item->price*$item->quantity),
+            'DiscountRate'=>$item->price==0||$item->quantity==0?0:$item->discount/$item->price,
             'Amount41'=>$item->usedPoints,
             'OriginalAmount41'=>$item->usedPoints,
 

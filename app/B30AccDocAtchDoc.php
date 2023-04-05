@@ -43,7 +43,7 @@ class B30AccDocAtchDoc extends Model
             'AtchDocDate' => Carbon::today()->format('Y-m-d'),
             'BranchCode' => 'A01',
             'DocCode' => 'H2',
-            'Description' => "Đơn hàng lên từ nhanh.vn"
+            'Description' => trim(str_replace('Kho hàng hóa','',$warehouses?$warehouses->HH->Name:''))."Đơn hàng lên từ nhanh.vn"
         ];
     }
 }

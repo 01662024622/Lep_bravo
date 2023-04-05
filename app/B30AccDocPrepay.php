@@ -26,7 +26,7 @@ class B30AccDocPrepay extends Model
         return  [
             'CustomerId' => $customer->Id,
             'DocNo' => "TLN".$order->Id,
-            'Description' => "Đơn lên từ nhanh",
+            'Description' => ($warehouses?$warehouses->HH->ClassCode2:'').$order->description,
 
             'Account'=>$warehouses?$warehouses->HH->ClassCode2:'',
 

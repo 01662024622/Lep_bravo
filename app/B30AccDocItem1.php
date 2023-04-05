@@ -9,7 +9,7 @@ class B30AccDocItem1 extends Model
 {
     protected $fillable = [
         'ItemId', 'BranchCode',  'Unit', 'Quantity', 'ConvertRate9', 'Quantity9', 'OriginalUnitCost', 'UnitCost', 'OriginalAmount9',
-         'Amount9', 'CreatedBy', 'DebitAccount', 'CreditAccount', 'WarehouseId','Stt','DocDate','DocGroup','DocCode','RowId' ];
+         'Amount9', 'CreatedBy', 'DebitAccount', 'CreditAccount', 'WarehouseId','Stt','DocDate','DocGroup','DocCode','RowId','DeptId' ];
     protected $primaryKey ='Id';
     protected $table = "B30AccDocItem1";
     public $timestamps = false;
@@ -19,12 +19,13 @@ class B30AccDocItem1 extends Model
             'DocDate' => Carbon::today()->format('Y-m-d'),
             'BuiltinOrder' => $index,
             'ItemId' => $itemInfo->Id,
-            'Desciption' => $itemInfo->Name,
+            'Description' => $itemInfo->Name,
             'Unit' => $itemInfo->Unit,
             'Quantity' => $item->quantity,
             'ConvertRate9' => 1,
             'Quantity9' => $item->quantity,
 
+            'DeptId' => $warehouses ? $warehouses->HH->ClassCode3 : '20354472',
             'OriginalUnitCost'=>$item->price,
             'UnitCost'=>$item->price,
             'OriginalAmount9'=>$item->money,

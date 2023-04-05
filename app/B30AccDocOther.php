@@ -18,7 +18,7 @@ class B30AccDocOther extends Model
         'DebitAccount','DebitDueDate','DebitOriginalAmount','DebitOriginalAmount9','CreditAccount',
         'CreditDueDate','CreditOriginalAmount','CreditOriginalAmount9','Amount',
         'Amount9','DebitCustomerId',
-        'CreditCustomerId', 'Stt', 'BuiltinOrder'
+        'CreditCustomerId', 'Stt', 'BuiltinOrder','RowId'
     ];
     protected $primaryKey = 'Id';
     protected $table = "B30AccDocOther";
@@ -49,4 +49,5 @@ class B30AccDocOther extends Model
             'DocCode' => 'BT'
         ];
     }
+
 }

@@ -8,7 +8,7 @@ use stdClass;
 class B20Warehouse extends Model
 {
     protected $fillable = [
-        'Name2','Address','ClassCode1','ClassCode2','ClassCode3'];
+        'Name','Name2','Address','ClassCode1','ClassCode2','ClassCode3'];
     protected $primaryKey ='Id';
     protected $table = "B20Warehouse";
     public $timestamps = false;
