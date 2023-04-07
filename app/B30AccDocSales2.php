@@ -49,7 +49,7 @@ class B30AccDocSales2 extends Model
             'OriginalAmount2' => $itemAccInfo->OriginalUnitPrice * $item->quantity,
             'Amount2' => $itemAccInfo->OriginalUnitPrice * $item->quantity,
 
-            'CreditAccount2' => $warehouses ? $warehouses->HH->ClassCode2 : '1311',
+            'CreditAccount2' => $itemAccInfo->DebitAccount2,
             'DeptId' => $warehouses ? $warehouses->HH->ClassCode3 : '20354472',
             'DebitAccount2' => '5212',
             'CreditAccount' => '632',

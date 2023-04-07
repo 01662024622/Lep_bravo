@@ -16,7 +16,7 @@ class B30AccDocSales extends Model
         'EmployeeId', 'TransCode', 'DiscountRate', 'CurrencyCode', 'ExchangeRate', 'DocStatus', 'CreatedBy',
         'PlateNumber', 'DueDate',
         'DebitAccountMk','DebitAccountFl', 'DebitAccountDl', 'CreditAccountMk', 'CreditAccountFL', 'CreditAccountDl',
-        'TotalOriginalAmount', 'TotalAmount0', 'TotalAmount', 'TotalAmount4', 'TotalAmount41','DeptId',
+        'TotalOriginalAmount', 'TotalAmount0', 'TotalAmount', 'TotalAmount4', 'TotalAmount41','DeptId','ExpenseCatgId',
         'TotalOriginalAmount0', 'TotalOriginalAmount', 'TotalOriginalAmount4', 'TotalOriginalAmount41','Stt','TotalOriginalAmountDl','TotalAmountDl'
     ];
     protected $primaryKey = 'Id';
@@ -42,18 +42,17 @@ class B30AccDocSales extends Model
             'CreditAccountDl' => $warehouses?$warehouses->HH->ClassCode2:'',
             'PlateNumber' => $order->couponCode?$order->couponCode:'',
             'DeptId' => $warehouses ? $warehouses->HH->ClassCode3 : '20354472',
-
-            'TotalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney-$order->customerShipFee,
+            'ExpenseCatgId'=>'26931992',
+            'TotalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney,
             'TotalAmount4'=>$order->moneyDiscount,
             'TotalAmountDl'=> $order->customerShipFee,
             'TotalAmount41'=> $order->usedPoints,
             'TotalAmount'=>$order->calcTotalMoney,
-            'TotalOriginalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney-$order->customerShipFee,
+            'TotalOriginalAmount0'=>$order->usedPoints+$order->moneyDiscount+$order->calcTotalMoney,
             'TotalOriginalAmount4'=>$order->moneyDiscount,
-            'TotalOriginalAmountDl'=>$order->customerShipFee,
             'TotalOriginalAmount41'=> $order->usedPoints,
             'TotalOriginalAmount'=>$order->calcTotalMoney,
-            'Description' => trim(str_replace('Kho hàng hóa','',$warehouses?$warehouses->HH->Name:'')).$order->description,
+            'Description' => trim(str_replace('Kho hàng hóa','',$warehouses?$warehouses->HH->Name:''))."-".$order->description,
 
             'TransCode' => '2301',
             'CurrencyCode' => 'VND',
@@ -97,7 +96,7 @@ class B30AccDocSales extends Model
             'TotalOriginalAmount'=>$order->calcTotalMoney,
 
             'TransCode' => '2107',
-            'Description' => trim(str_replace('Kho hàng hóa','',$warehouses?$warehouses->HH->Name:'')).$order->description,
+            'Description' => trim(str_replace('Kho hàng hóa','',$warehouses?$warehouses->HH->Name:''))."-".$order->description,
             'CurrencyCode' => 'VND',
             'DiscountRate' => 0,
             'ExchangeRate' => '1',

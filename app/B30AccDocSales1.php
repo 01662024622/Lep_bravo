@@ -10,10 +10,10 @@ class B30AccDocSales1 extends Model
     protected $fillable = [
         'BranchCode','Stt', 'BuiltinOrder', 'DocCode', 'DocGroup', 'DocDate', 'CustomerId', 'ItemId', 'Description',
         'Unit', 'Quantity', 'ConvertRate9', 'Quantity9', 'OriginalUnitPrice', 'UnitPrice', 'OriginalAmount9',
-         'Amount9', 'OriginalAmount2', 'Amount2',
+         'Amount9', 'OriginalAmount2', 'Amount2','ExpenseCatgId',
           'DebitAccount2', 'CreditAccount2', 'DebitAccount', 'CreditAccount', 'DebitAccount3',
            'Amount3', 'OriginalAmount3', 'Amount4', 'OriginalAmount4', 'DiscountRate', 'DebitAccount4','CreditAccount4','CreditAccount41',
-            'OriginalAmount41', 'Amount41', 'DebitAccount41', 'CreatedBy', 'Gia_Tb_Tt', 'WarehouseId','DeptId'];
+            'OriginalAmount41', 'Amount41', 'DebitAccount41', 'CreatedBy', 'Gia_Tb_Tt', 'WarehouseId','DeptId','TransCode'];
     protected $primaryKey ='Id';
     protected $table = "B30AccDocSales1";
     public $timestamps = false;
@@ -44,7 +44,7 @@ class B30AccDocSales1 extends Model
             'Amount9'=>$item->price*$item->quantity,
             'OriginalAmount2'=>$item->price*$item->quantity,
             'Amount2'=>$item->price*$item->quantity,
-
+            'ExpenseCatgId'=>'26931992',
             'DeptId' => $warehouses ? $warehouses->HH->ClassCode3 : '20354472',
             'DebitAccount2'=>$warehouses?$warehouses->HH->ClassCode2:'131',  //5212
             'CreditAccount4'=>$warehouses?$warehouses->HH->ClassCode2:'131',  //5212
@@ -66,7 +66,7 @@ class B30AccDocSales1 extends Model
             'OriginalAmount41'=>$item->usedPoints,
 
             'WarehouseId'=> $itemInfo->ItemType == "1" ? ($warehouses ? $warehouses->TP->Id : 0) : ($warehouses ? $warehouses->HH->Id : 0),
-
+            'TransCode'=>'2301',
             'Gia_Tb_Tt' => '1',
             'CreatedBy' => 4,
             'BranchCode' => 'A01',

@@ -38,7 +38,7 @@ class B30AccDocItem extends Model
             'DeptId' => $warehouses ? $warehouses->HH->ClassCode3 : '20354472',
 
             'TransCode' => $order->type==1?'2100':'2211',
-            'Description' => trim(str_replace('Kho hàng hóa','',$warehouses?$warehouses->HH->Name:'')).$order->description,
+            'Description' => trim(str_replace('Kho hàng hóa','',$warehouses?$warehouses->HH->Name:''))."-".$order->description,
             'CurrencyCode' => 'VND',
             'DiscountRate' => 0,
             'ExchangeRate' => '1',
