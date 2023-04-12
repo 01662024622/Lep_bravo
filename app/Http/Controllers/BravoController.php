@@ -81,7 +81,7 @@ class BravoController extends Controller
 
         $res = $this->SpeedService->getProductDetail($speed->productId);
         foreach ($res->data as $value) {
-            B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 2, "ItemGroupCode" => "HH"]);
+            B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "HH"]);
         }
         return response("true", 200);
     }
@@ -221,15 +221,33 @@ class BravoController extends Controller
         // detail from bravo
         $customer = B20Customer::getCustomer($order);
         $this->getCustomerLevelId($order->customerId, $customer);
-
+        if(!property_exists($order, 'saleChannel'))$order->saleChannel=1;
         $warehouses = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
+        if($warehouses!=null&&($order->saleChannel==41||$order->saleChannel==42||$order->saleChannel==43)) $warehouses->HH->ClassCode2="1317";
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
         $order->usedPoints = $order->usedPoints ? $order->usedPoints : 0;
         $order->moneyDiscount = $order->moneyDiscount ? $order->moneyDiscount : 0;
         $order->moneyTransfer = property_exists($order, 'moneyTransfer')&&$order->moneyTransfer!==null ? $order->moneyTransfer : 0;
         $order->moneyDeposit = property_exists($order, 'moneyDeposit')&&$order->moneyDeposit!==null ? $order->moneyDeposit : 0;
         $order->calcTotalMoney = $order->calcTotalMoney ? abs($order->calcTotalMoney)+$order->moneyTransfer+$order->moneyDeposit : $order->moneyDeposit+$order->moneyTransfer;
-        $order->description = $typeDoc ."-". $order->description;
+        if($order->saleChannel==41){
+            $order->description = "Lazada-". $order->description;
+        }elseif($order->saleChannel==42){
+
+            $order->description = "Shopee-". $order->description;
+        }elseif($order->saleChannel==43){
+
+            $order->description = "Sendo-". $order->description;
+        }elseif($order->saleChannel==44){
+
+            $order->description = "Tiki-". $order->description;
+        }
+        elseif($order->saleChannel==48){
+
+            $order->description = "Tiktok -". $order->description;
+        }else{
+            $order->description = $typeDoc ."-". $order->description;
+        }
 
         $data = B30AccDocSales::setData($order, $customer, $employeeid, $warehouses);
         $i = 1;
