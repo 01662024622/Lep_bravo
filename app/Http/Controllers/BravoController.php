@@ -80,7 +80,7 @@ class BravoController extends Controller
 
         $res = $this->SpeedService->getProductDetail($speed->productId);
         foreach ($res->data as $value) {
-            B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "HH"]);
+            B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511"]);
         }
         return response("true", 200);
     }
