@@ -77,7 +77,6 @@ class BravoController extends Controller
         $parentId = $speed->parentId;
         if ($parentId != null || $parentId > 0)
             return response('true', 200);
-        // $product = B20Item::create(["Code"=>$speed["data"]["code"],"Name"=>$speed["data"]["name"],"Unit"=>"Chiếc","ItemType"=>2]);
 
         $res = $this->SpeedService->getProductDetail($speed->productId);
         foreach ($res->data as $value) {
@@ -89,21 +88,18 @@ class BravoController extends Controller
 
 
 
-    private function procedureAddOrder($speed)
+    private function procedureAddOrder()
     {
 
         //detail order
-        $orders = $this->SpeedService->getOrderDetail($speed->orderId);
-        if (!property_exists($orders, "data")) return response("true", 200);
-        $orders = $orders->data->orders;
-        $order = null;
-        foreach ($orders as $i) {
-            $order = $i;
-            break;
+        $orders = $this->SpeedService->getOrderList();
+        if ($orders == null) return response("true", 200);
+        foreach ($orders as $order) {
+            if(!property_exists($order, 'shopOrderId')&&$order->shopOrderId!=null)$order->id=$order->shopOrderId;
+            if ($order->typeId == 1) return $this->procedureAddOrderReal($order, 1, 'Đơn hàng');
+            if ($order->typeId == 14) return $this->procedureAddOrderRefund($order, 1, 'Đơn hàng');
         }
-        if ($order == null) return response("true", 200);
-        if ($order->typeId == 1) return $this->procedureAddOrderReal($order, 1, 'Đơn hàng');
-        if ($order->typeId == 14) return $this->procedureAddOrderRefund($order, 1, 'Đơn hàng');
+        return response('true', 200);
     }
 
 
@@ -216,12 +212,15 @@ class BravoController extends Controller
     {
 
         if (!property_exists($order, 'customerShipFee')) $order->customerShipFee = 0;
+
         $check = B30AccDocSales::where("DocNo", 'HDN' . $order->id)->get();
         if (sizeof($check) > 0) return response("true", 200);
         // detail from bravo
         $customer = B20Customer::getCustomer($order);
         $this->getCustomerLevelId($order->customerId, $customer);
         if(!property_exists($order, 'saleChannel'))$order->saleChannel=1;
+
+        $check = B30AccDocSales::where("DocNo", 'HDN' . $order->id)->get();
         $warehouses = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
         if($warehouses!=null&&($order->saleChannel==41||$order->saleChannel==42||$order->saleChannel==43)) $warehouses->HH->ClassCode2="1319";
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
@@ -231,9 +230,10 @@ class BravoController extends Controller
         $order->moneyDeposit = property_exists($order, 'moneyDeposit')&&$order->moneyDeposit!==null ? $order->moneyDeposit : 0;
         $order->calcTotalMoney = $order->calcTotalMoney ? abs($order->calcTotalMoney)+$order->moneyTransfer+$order->moneyDeposit : $order->moneyDeposit+$order->moneyTransfer;
         if($order->saleChannel==41){
+            if($warehouses!=null) $warehouses->HH->ClassCode2='131H';
             $order->description = "Lazada-". $order->description;
         }elseif($order->saleChannel==42){
-
+            if($warehouses!=null) $warehouses->HH->ClassCode2='131S';
             $order->description = "Shopee-". $order->description;
         }elseif($order->saleChannel==43){
 
@@ -524,14 +524,8 @@ class BravoController extends Controller
     private function procedureUpdateOrder($speed)
     {
 
-        $orders = $this->SpeedService->getOrderDetail($speed->orderId);
-        if (!property_exists($orders, "data")) return response("true", 200);
-        $orders = $orders->data->orders;
-        $order = null;
-        foreach ($orders as $i) {
-            $order = $i;
-            break;
-        }
+        $order = $this->SpeedService->getOrderDetail($speed->orderId);
+        if ($order==null) return response("true", 200);
         if ($order->typeId == 1) {
             $olderOrder = B30AccDocSales::where("DocNo", 'HDN' . $speed->orderId)->get();
             foreach ($olderOrder as $i) {
