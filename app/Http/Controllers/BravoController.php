@@ -223,7 +223,7 @@ class BravoController extends Controller
         $this->getCustomerLevelId($order->customerId, $customer);
         if(!property_exists($order, 'saleChannel'))$order->saleChannel=1;
         $warehouses = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
-        if($warehouses!=null&&($order->saleChannel==41||$order->saleChannel==42||$order->saleChannel==43)) $warehouses->HH->ClassCode2="1317";
+        if($warehouses!=null&&($order->saleChannel==41||$order->saleChannel==42||$order->saleChannel==43)) $warehouses->HH->ClassCode2="1319";
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
         $order->usedPoints = $order->usedPoints ? $order->usedPoints : 0;
         $order->moneyDiscount = $order->moneyDiscount ? $order->moneyDiscount : 0;
