@@ -241,7 +241,6 @@ class BravoController extends Controller
                 $warehouses->HH->ClassCode2='131S';
                 $warehouses->HH->ClassCode3='20356872';
             }
-
             $order->description = "Shopee-". $order->description;
         }elseif($order->saleChannel==43){
 
