@@ -14,17 +14,11 @@ use App\B30AccDocItem1;
 use App\B30AccDocItem2;
 use App\B30AccDocOther;
 use App\B30AccDocPaybill;
-use App\B30AccDocPrepay;
 use App\B30AccDocSales;
 use App\B30AccDocSales1;
 use App\B30AccDocSales2;
-use App\Models\HT20\B20Customer as HT20B20Customer;
 use App\Services\SpeedService;
-use App\Webhook;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Psr\Log\NullLogger;
 use stdClass;
 
 class BravoController extends Controller
@@ -55,7 +49,7 @@ class BravoController extends Controller
 
         if ($speed->event == "orderAdd") {
             $speed = $speed->data;
-            return $this->procedureAddOrder($speed);
+            return $this->procedureAddOrder();
         }
         if ($speed->event == "orderUpdate") {
             $speed = $speed->data;
@@ -80,7 +74,14 @@ class BravoController extends Controller
 
         $res = $this->SpeedService->getProductDetail($speed->productId);
         foreach ($res->data as $value) {
-            B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511"]);
+            $check = B20Item::getItemByCode($value->code);
+            if($check == null){
+                if($value->idNhanh == $speed->productId){
+                    B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 2, "ItemGroupCode" => "15611"]);
+                }else{
+                    B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511"]);
+                }
+            }
         }
         return response("true", 200);
     }
