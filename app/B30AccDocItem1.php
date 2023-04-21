@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class B30AccDocItem1 extends Model
 {
     protected $fillable = [
-        'ItemId', 'BranchCode',  'Unit', 'Quantity', 'ConvertRate9', 'Quantity9', 'OriginalUnitCost', 'UnitCost', 'OriginalAmount9',
+        'ItemId', 'BranchCode',  'Unit', 'Quantity', 'ConvertRate9', 'Quantity9', 'OriginalUnitCost', 'UnitCost', 'OriginalAmount9','Amount','OriginalAmount',
          'Amount9', 'CreatedBy', 'DebitAccount', 'CreditAccount', 'WarehouseId','Stt','DocDate','DocGroup','DocCode','RowId','DeptId','BuiltinOrder' ];
     protected $primaryKey ='Id';
     protected $table = "B30AccDocItem1";
@@ -30,6 +30,8 @@ class B30AccDocItem1 extends Model
             'UnitCost'=>$item->price,
             'OriginalAmount9'=>$item->money,
             'Amount9'=>$item->money,
+            'Amount'=>$item->money,
+            'OriginalAmount'=>$item->money,
 
             'DebitAccount'=>$itemInfo->ItemType == "1" ? ($warehouses ? $warehouses->TP->Name2 : '1561') : ($warehouses ? $warehouses->HH->Name2 : '1561'), //=>$warehouse?$warehouse->ClassCode1:''
             'CreditAccount'=>$account, //632
