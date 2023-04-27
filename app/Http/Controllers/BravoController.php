@@ -49,7 +49,7 @@ class BravoController extends Controller
 
         if ($speed->event == "orderAdd") {
             $speed = $speed->data;
-            return $this->procedureAddOrder();
+            return $this->procedureAddOrder($speed);
         }
         if ($speed->event == "orderUpdate") {
             $speed = $speed->data;
@@ -75,10 +75,10 @@ class BravoController extends Controller
         $res = $this->SpeedService->getProductDetail($speed->productId);
         foreach ($res->data as $value) {
             $check = B20Item::getItemByCode($value->code);
-            if($check == null){
-                if($value->idNhanh == $speed->productId){
+            if ($check == null) {
+                if ($value->idNhanh == $speed->productId) {
                     B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 2, "ItemGroupCode" => "15611"]);
-                }else{
+                } else {
                     B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511"]);
                 }
             }
@@ -89,14 +89,26 @@ class BravoController extends Controller
 
 
 
-    private function procedureAddOrder()
+    private function procedureAddOrder($speed)
     {
 
         //detail order
+        $orderDeatail = $this->SpeedService->getOrderDetail($speed->orderId);
+        if (!property_exists($orderDeatail, "data")) return response("true", 200);
+        $orderDeatails = $orderDeatail->data->orders;
+        $orderDeatail = null;
+        foreach ($orderDeatails as $i) {
+            $orderDeatail = $i;
+            break;
+        }
+        if ($orderDeatail == null) return response("true", 200);
+
+        if ($orderDeatail->typeId == 1) return $this->procedureAddOrderReal($orderDeatail, 1, 'Đơn hàng');
+        if ($orderDeatail->typeId == 14) return $this->procedureAddOrderRefund($orderDeatail, 1, 'Đơn hàng');
         $orders = $this->SpeedService->getOrderList();
         if ($orders == null) return response("true", 200);
         foreach ($orders as $order) {
-            if(property_exists($order, 'shopOrderId')&&$order->shopOrderId!=null)$order->id=$order->shopOrderId;
+            if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null) $order->id = $order->shopOrderId;
             if ($order->typeId == 1) return $this->procedureAddOrderReal($order, 1, 'Đơn hàng');
             if ($order->typeId == 14) return $this->procedureAddOrderRefund($order, 1, 'Đơn hàng');
         }
@@ -219,42 +231,41 @@ class BravoController extends Controller
         // detail from bravo
         $customer = B20Customer::getCustomer($order);
         $this->getCustomerLevelId($order->customerId, $customer);
-        if(!property_exists($order, 'saleChannel'))$order->saleChannel=1;
+        if (!property_exists($order, 'saleChannel')) $order->saleChannel = 1;
 
         $check = B30AccDocSales::where("DocNo", 'HDN' . $order->id)->get();
         $warehouses = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
-        if($warehouses!=null&&($order->saleChannel==41||$order->saleChannel==42||$order->saleChannel==43)) $warehouses->HH->ClassCode2="1319";
+        if ($warehouses != null && ($order->saleChannel == 41 || $order->saleChannel == 42 || $order->saleChannel == 43)) $warehouses->HH->ClassCode2 = "1319";
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
         $order->usedPoints = $order->usedPoints ? $order->usedPoints : 0;
         $order->moneyDiscount = $order->moneyDiscount ? $order->moneyDiscount : 0;
-        $order->moneyTransfer = property_exists($order, 'moneyTransfer')&&$order->moneyTransfer!==null ? $order->moneyTransfer : 0;
-        $order->moneyDeposit = property_exists($order, 'moneyDeposit')&&$order->moneyDeposit!==null ? $order->moneyDeposit : 0;
-        $order->calcTotalMoney = $order->calcTotalMoney ? abs($order->calcTotalMoney)+$order->moneyTransfer+$order->moneyDeposit : $order->moneyDeposit+$order->moneyTransfer;
-        if($order->saleChannel==41){
-            if($warehouses!=null) {
-                $warehouses->HH->ClassCode2='131H';
-                $warehouses->HH->ClassCode3='20356992';
+        $order->moneyTransfer = property_exists($order, 'moneyTransfer') && $order->moneyTransfer !== null ? $order->moneyTransfer : 0;
+        $order->moneyDeposit = property_exists($order, 'moneyDeposit') && $order->moneyDeposit !== null ? $order->moneyDeposit : 0;
+        $order->calcTotalMoney = $order->calcTotalMoney ? abs($order->calcTotalMoney) + $order->moneyTransfer + $order->moneyDeposit : $order->moneyDeposit + $order->moneyTransfer;
+        if ($order->saleChannel == 41) {
+            if ($warehouses != null) {
+                $warehouses->HH->ClassCode2 = '131H';
+                $warehouses->HH->ClassCode3 = '20356992';
             }
-            $order->description = "Lazada-". $order->description;
-        }elseif($order->saleChannel==42){
-            
-            if($warehouses!=null) {
-                $warehouses->HH->ClassCode2='131S';
-                $warehouses->HH->ClassCode3='20356872';
+            $order->description = "Lazada-" . $order->description;
+        } elseif ($order->saleChannel == 42) {
+
+            if ($warehouses != null) {
+                $warehouses->HH->ClassCode2 = '131S';
+                $warehouses->HH->ClassCode3 = '20356872';
             }
-            $order->description = "Shopee-". $order->description;
-        }elseif($order->saleChannel==43){
+            $order->description = "Shopee-" . $order->description;
+        } elseif ($order->saleChannel == 43) {
 
-            $order->description = "Sendo-". $order->description;
-        }elseif($order->saleChannel==44){
+            $order->description = "Sendo-" . $order->description;
+        } elseif ($order->saleChannel == 44) {
 
-            $order->description = "Tiki-". $order->description;
-        }
-        elseif($order->saleChannel==48){
+            $order->description = "Tiki-" . $order->description;
+        } elseif ($order->saleChannel == 48) {
 
-            $order->description = "Tiktok -". $order->description;
-        }else{
-            $order->description = $typeDoc ."-". $order->description;
+            $order->description = "Tiktok -" . $order->description;
+        } else {
+            $order->description = $typeDoc . "-" . $order->description;
         }
 
         $data = B30AccDocSales::setData($order, $customer, $employeeid, $warehouses);
@@ -361,9 +372,9 @@ class BravoController extends Controller
         $warehouses = $order->depotId ? B20Warehouse::getWarehouse($order->depotId) : null;
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
         $order->moneyDiscount = $order->moneyDiscount ? $order->moneyDiscount : 0;
-        $order->moneyTransfer = property_exists($order, 'moneyTransfer')&&$order->moneyTransfer ? $order->moneyTransfer : 0;
-        $order->calcTotalMoney = $order->calcTotalMoney ? abs($order->calcTotalMoney)+$order->moneyTransfer : $order->moneyTransfer;
-        $order->description = $typeDoc ."-". $order->description;
+        $order->moneyTransfer = property_exists($order, 'moneyTransfer') && $order->moneyTransfer ? $order->moneyTransfer : 0;
+        $order->calcTotalMoney = $order->calcTotalMoney ? abs($order->calcTotalMoney) + $order->moneyTransfer : $order->moneyTransfer;
+        $order->description = $typeDoc . "-" . $order->description;
         $data = B30AccDocSales::setDataRefund($order, $customer, $employeeid, $warehouses);
         if (!property_exists($order, 'returnFromOrderId') || $order->returnFromOrderId == 0) $order->returnFromOrderId = $order->relatedBillId;
         $accSales = B30AccDocSales::where("DocNo", "HDN" . $order->returnFromOrderId)->get();
@@ -533,8 +544,8 @@ class BravoController extends Controller
     {
 
         $order = $this->SpeedService->getOrderDetail($speed->orderId);
-        if(property_exists($order, 'shopOrderId')&&$order->shopOrderId!=null)$order->id=$order->shopOrderId;
-        if ($order==null) return response("true", 200);
+        if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null) $order->id = $order->shopOrderId;
+        if ($order == null) return response("true", 200);
         if ($order->typeId == 1) {
             $olderOrder = B30AccDocSales::where("DocNo", 'HDN' . $speed->orderId)->get();
             foreach ($olderOrder as $i) {
