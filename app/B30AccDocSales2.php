@@ -68,7 +68,7 @@ class B30AccDocSales2 extends Model
 
             'Amount4' => $discount * $item->quantity,
             'OriginalAmount4' => $discount * $item->quantity,
-            'DiscountRate' => $itemAccInfo->OriginalUnitPrice == 0 || $item->quantity == 0 ? 0 : $discount / $itemAccInfo->OriginalUnitPrice,
+            'DiscountRate' => round(($itemAccInfo->OriginalUnitPrice == 0 || $item->quantity == 0 ? 0 : $discount / $itemAccInfo->OriginalUnitPrice),3),
 
 
             'WarehouseId' => $itemInfo->ItemType == "1" ? ($warehouses ? $warehouses->TP->Id : 0) : ($warehouses ? $warehouses->HH->Id : 0),
