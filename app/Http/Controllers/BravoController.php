@@ -94,17 +94,10 @@ class BravoController extends Controller
 
         //detail order
         $orderDeatail = $this->SpeedService->getOrderDetail($speed->orderId);
-        if (!property_exists($orderDeatail, "data")) return response("true", 200);
-        $orderDeatails = $orderDeatail->data->orders;
-        $orderDeatail = null;
-        foreach ($orderDeatails as $i) {
-            $orderDeatail = $i;
-            break;
+        if ($orderDeatail != null) {
+            if ($orderDeatail->typeId == 1) return $this->procedureAddOrderReal($orderDeatail, 1, 'Đơn hàng');
+            if ($orderDeatail->typeId == 14) return $this->procedureAddOrderRefund($orderDeatail, 1, 'Đơn hàng');
         }
-        if ($orderDeatail == null) return response("true", 200);
-
-        if ($orderDeatail->typeId == 1) return $this->procedureAddOrderReal($orderDeatail, 1, 'Đơn hàng');
-        if ($orderDeatail->typeId == 14) return $this->procedureAddOrderRefund($orderDeatail, 1, 'Đơn hàng');
         $orders = $this->SpeedService->getOrderList();
         if ($orders == null) return response("true", 200);
         foreach ($orders as $order) {
