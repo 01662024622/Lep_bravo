@@ -35,8 +35,6 @@ class BravoController extends Controller
     }
     public function create(Request $request)
     {
-
-
         $speed = json_decode(json_encode($request->only(["event", "webhooksVerifyToken", "data"])), FALSE);
         $this->SpeedService = SpeedService::getInstance();
         if ($speed->webhooksVerifyToken != "Thangui0011@@1996") return response('error', 404);
@@ -89,7 +87,7 @@ class BravoController extends Controller
     {
         $itemInfo = null;
         $resDetail = $this->SpeedService->getProductDetail($id)->data;
-        if (sizeof($resDetail) > 0) {
+        if (count((array)$resDetail) > 0) {
             foreach ($resDetail as $valueDetail) {
                 if ($valueDetail->parentId > 0) {
                     $res = $this->SpeedService->getProductDetail($valueDetail->idNhanh)->data;
@@ -123,12 +121,17 @@ class BravoController extends Controller
             if ($orderDeatail->typeId == 1) return $this->procedureAddOrderReal($orderDeatail, 1, 'Đơn hàng');
             if ($orderDeatail->typeId == 14) return $this->procedureAddOrderRefund($orderDeatail, 1, 'Đơn hàng');
         }
-        $orders = $this->SpeedService->getOrderList();
+        $this->addListOrder($this->SpeedService);
+    }
+    public function addListOrder($service)
+    {
+        $this->SpeedService = $service;
+        $orders = $this->SpeedService->getOrderList()->data->orders;
         if ($orders == null) return response("true", 200);
         foreach ($orders as $order) {
             if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null) $order->id = $order->shopOrderId;
-            if ($order->typeId == 1) return $this->procedureAddOrderReal($order, 1, 'Đơn hàng');
-            if ($order->typeId == 14) return $this->procedureAddOrderRefund($order, 1, 'Đơn hàng');
+            if ($order->typeId == 1)  $this->procedureAddOrderReal($order, 1, 'Đơn hàng');
+            if ($order->typeId == 14)  $this->procedureAddOrderRefund($order, 1, 'Đơn hàng');
         }
         return response('true', 200);
     }
@@ -138,16 +141,47 @@ class BravoController extends Controller
 
 
 
-
+    public function procedureChangeOver($service)
+    {
+        $this->SpeedService = $service;
+        $this->procedureChange();
+    }
     private function procedureChange()
     {
         $data = $this->SpeedService->getWarehousing()->data->bill;
         foreach ($data as $order) {
+            $order->products = json_decode(json_encode($order->products), true);
             $check = B30AccDocItem::where("DocNo", $order->type == 1 ? 'NKN' . $order->id : 'XKN' . $order->id)->get();
-            if (sizeof($check) > 0) continue;
+
+
+            $details = null;
+            if (sizeof($check) > 0) {
+                foreach ($check as $iy) {
+                    $check = $iy;
+                    break;
+                }
+                if ($order->money != $check->TotalAmount) {
+                    B30AccDocItem::where("DocNo", $order->type == 1 ? 'NKN' . $order->id : 'XKN' . $order->id)->delete();
+                    B30AccDocItem1::where("Stt", $check->Stt)->delete();
+                    B30AccDocItem2::where("Stt", $check->Stt)->delete();
+                } else {
+                    if ($order->type == 1) {
+                        $details = B30AccDocItem1::where("Stt", $check->Stt)->get();
+                    }
+                    if ($order->type == 2) {
+                        $details = B30AccDocItem2::where("Stt", $check->Stt)->get();
+                    }
+                    if (sizeof($order->products) == sizeof($details)) {
+                        continue;
+                    } else {
+                        B30AccDocItem::where("DocNo", $order->type == 1 ? 'NKN' . $order->id : 'XKN' . $order->id)->delete();
+                        B30AccDocItem1::where("Stt", $check->Stt)->delete();
+                        B30AccDocItem2::where("Stt", $check->Stt)->delete();
+                    }
+                }
+            }
             $account = "";
             if ($order->mode == 2) {
-
                 $order->moneyDiscount = $order->discount;
                 $order->customerAddress = "";
                 $order->customerWard = "";
@@ -160,7 +194,6 @@ class BravoController extends Controller
                 $order->usedPoints = (int)(property_exists($order, 'usedPoints') ? $order->usedPoints : 0);
                 $order->discount = (int)(property_exists($order, 'discount') ? $order->discount : 0);
                 $order->calcTotalMoney = $order->money - $order->usedPoints;
-                $order->products = json_decode(json_encode($order->products), true);
                 $order->type == 1 ?
                     $this->procedureAddOrderRefund($order, 2, "Bán lẻ") :
                     $this->procedureAddOrderReal($order, 2, "Bán lẻ");
@@ -188,6 +221,7 @@ class BravoController extends Controller
             $accDocItem = [];
             if ($order->type == 1) {
                 foreach ($order->products as $item) {
+                    $item = (object)$item;
                     $itemInfo = B20Item::getItemByCode($item->code);
                     if ($itemInfo == null) {
                         $itemInfo = $this->procedureProductFromSub($item->id);

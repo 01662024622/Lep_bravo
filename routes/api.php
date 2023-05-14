@@ -27,4 +27,5 @@ Route::group(['prefix' => 'v1'], function() {
     Route::get('webhook/nhanh/erp', 'WebhookController@get')->name('webhook.api.nhanh');
     Route::get('webhook/bravo/erp', 'BravoController@get')->name('webhook.api.bravo');
     Route::post('webhook/bravo/erp', 'BravoController@create')->name('webhook.api.bravo');
+    Route::post('webhook/bravo/erp/auto', 'AutoController@create')->name('webhook.api.bravo.auto');
 });
