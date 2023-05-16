@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\B20Customer;
 use App\B20Employee;
 use App\B20Item;
+use App\B20ItemInfo;
+use App\B20Product;
 use App\B20Warehouse;
 use App\B30AccDoc;
 use App\B30AccDocApplyPrepayment;
@@ -69,44 +71,45 @@ class BravoController extends Controller
         $parentId = $speed->parentId;
         if ($parentId != null || $parentId > 0)
             return response('true', 200);
-
-        $res = $this->SpeedService->getProductDetail($speed->productId);
+        return $this->importProducts($speed->productId);
+    }
+    private function importProducts($id)
+    {
+        $res = $this->SpeedService->getProductDetail($id);
+        $product=null;
+        foreach ($res->data as $value) {
+            $product = B20Product::getItemByCode($value->code);
+            if ($product == null) {
+                if ($value->idNhanh == $id) {
+                    B20Product::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ParentId" => 26757072, "ProductType" => 2, "ConvertRate1" => 1, "ConvertRate2" => 1, "IsGroup" => 0]);
+                    $product = B20Product::getItemByCode($value->code);
+                    break;
+                }
+            }
+        }
         foreach ($res->data as $value) {
             $check = B20Item::getItemByCode($value->code);
             if ($check == null) {
-                if ($value->idNhanh == $speed->productId) {
-                    B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 2, "ItemGroupCode" => "15611"]);
-                } else {
                     B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511"]);
-                }
+                    $check = B20Item::getItemByCode($value->code);
+                    B20ItemInfo::create(["ItemId" => $check->Id, "ProductId" => $product->Id, "Weight" => 1]);
             }
         }
         return response("true", 200);
     }
     private function procedureProductFromSub($id)
     {
-        $itemInfo = null;
         $resDetail = $this->SpeedService->getProductDetail($id)->data;
         if (count((array)$resDetail) > 0) {
             foreach ($resDetail as $valueDetail) {
                 if ($valueDetail->parentId > 0) {
-                    $res = $this->SpeedService->getProductDetail($valueDetail->idNhanh)->data;
-                    foreach ($res as $value) {
-                        $check = B20Item::getItemByCode($value->code);
-                        if ($check == null) {
-                            if ($value->parentId > 0) {
-                                B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511"]);
-                            } else {
-                                B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 2, "ItemGroupCode" => "15611"]);
-                            }
-                        }
-                        if ($value->idNhanh == $id) $itemInfo = B20Item::getItemByCode($value->code);;
-                    }
+                    $this->importProducts($valueDetail->parentId);
+                    break;
+                }else{
+                    $this->importProducts($valueDetail->idNhanh);
+                    break;
                 }
-                return $itemInfo;
             }
-        } else {
-            return $itemInfo;
         }
     }
 
@@ -152,8 +155,6 @@ class BravoController extends Controller
         foreach ($data as $order) {
             $order->products = json_decode(json_encode($order->products), true);
             $check = B30AccDocItem::where("DocNo", $order->type == 1 ? 'NKN' . $order->id : 'XKN' . $order->id)->get();
-
-
             $details = null;
             if (sizeof($check) > 0) {
                 foreach ($check as $iy) {
@@ -224,7 +225,8 @@ class BravoController extends Controller
                     $item = (object)$item;
                     $itemInfo = B20Item::getItemByCode($item->code);
                     if ($itemInfo == null) {
-                        $itemInfo = $this->procedureProductFromSub($item->id);
+                        $this->procedureProductFromSub($item->id);
+                        $itemInfo = B20Item::getItemByCode($item->code);
                         if ($itemInfo == null) {
                             $order->description .= "-";
                             $order->description .= $item->code;
@@ -240,7 +242,8 @@ class BravoController extends Controller
                     $itemInfo = B20Item::getItemByCode($item->code);
                     if ($itemInfo == null) {
                         if ($itemInfo == null) {
-                            $itemInfo = $this->procedureProductFromSub($item->id);
+                            $this->procedureProductFromSub($item->id);
+                            $itemInfo = B20Item::getItemByCode($item->code);
                             if ($itemInfo == null) {
                                 $order->description .= "-";
                                 $order->description .= $item->code;
@@ -344,7 +347,8 @@ class BravoController extends Controller
             $itemInfo = B20Item::getItemByCode($item->productCode);
 
             if ($itemInfo == null) {
-                $itemInfo = $this->procedureProductFromSub($item->id);
+                $this->procedureProductFromSub($item->id);
+                $itemInfo = B20Item::getItemByCode($item->code);
                 if ($itemInfo == null) {
                     $order->description = $item->productCode . '-' . $order->description;
                     $j++;
@@ -364,7 +368,8 @@ class BravoController extends Controller
                         foreach ($item->giftProducts as $gift) {
                             $giftInfo = B20Item::getItemByCode($gift->productCode);
                             if ($giftInfo == null) {
-                                $giftInfo = $this->procedureProductFromSub($gift->productId);
+                                $this->procedureProductFromSub($gift->productId);
+                                $giftInfo = B20Item::getItemByCode($gift->productCode);
                                 if ($giftInfo == null) {
                                     $order->description = $gift->productCode . '-' . $order->description;
                                     continue;
@@ -388,7 +393,8 @@ class BravoController extends Controller
                             foreach ($gifts as $gift) {
                                 $giftInfo = B20Item::getItemByCode($gift->productCode);
                                 if ($giftInfo == null) {
-                                    $giftInfo = $this->procedureProductFromSub($gift->productId);
+                                    $this->procedureProductFromSub($gift->productId);
+                                    $giftInfo = B20Item::getItemByCode($gift->productCode);
                                     if ($giftInfo == null) {
                                         $order->description = $gift->productCode . '-' . $order->description;
                                         continue;
@@ -469,7 +475,8 @@ class BravoController extends Controller
             if (!property_exists($item, 'productCode')) $item->productCode = $item->code;
             $itemInfo = B20Item::getItemByCode($item->productCode);
             if ($itemInfo == null) {
-                $itemInfo = $this->procedureProductFromSub($item->id);
+                $this->procedureProductFromSub($item->productId);
+                $itemInfo = B20Item::getItemByCode($item->productCode);
                 if ($itemInfo == null) {
                     $order->description = $item->productCode . '-' . $order->description;
                     continue;
@@ -491,7 +498,8 @@ class BravoController extends Controller
                         foreach ($item->giftProducts as $gift) {
                             $giftInfo = B20Item::getItemByCode($gift->productCode);
                             if ($giftInfo == null) {
-                                $giftInfo = $this->procedureProductFromSub($gift->productId);
+                                $this->procedureProductFromSub($gift->productId);
+                                $giftInfo = B20Item::getItemByCode($gift->productCode);
                                 if ($giftInfo == null) {
                                     $order->description = $gift->productCode . '-' . $order->description;
                                     continue;
@@ -515,7 +523,8 @@ class BravoController extends Controller
                             foreach ($gifts as $gift) {
                                 $giftInfo = B20Item::getItemByCode($gift->productCode);
                                 if ($giftInfo == null) {
-                                    $giftInfo = $this->procedureProductFromSub($gift->productId);
+                                    $this->procedureProductFromSub($gift->productId);
+                                    $giftInfo = B20Item::getItemByCode($gift->productCode);
                                     if ($giftInfo == null) {
                                         $order->description = $gift->productCode . '-' . $order->description;
                                         continue;
@@ -575,7 +584,8 @@ class BravoController extends Controller
 
                 $giftInfo = B20Item::getItemByCode($gift->code);
                 if ($giftInfo == null) {
-                    $giftInfo = $this->procedureProductFromSub($gift->productId);
+                    $this->procedureProductFromSub($gift->id);
+                    $giftInfo = B20Item::getItemByCode($gift->code);
                     if ($giftInfo == null) {
                         continue;
                     }
@@ -609,7 +619,8 @@ class BravoController extends Controller
 
                 $giftInfo = B20Item::getItemByCode($gift->code);
                 if ($giftInfo == null) {
-                    $giftInfo = $this->procedureProductFromSub($gift->productId);
+                    $this->procedureProductFromSub($gift->id);
+                    $giftInfo = B20Item::getItemByCode($gift->code);
                     if ($giftInfo == null) {
                         continue;
                     }
