@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class B20Item extends Model
 {
     protected $fillable = [
-        'Code','Name', 'Unit', 'ItemType','ItemGroupCode'
+        'Code','Name', 'Unit', 'ItemType','ItemGroupCode','ParentId'
     ];
     protected $primaryKey ='Id';
     protected $table = "B20Item";

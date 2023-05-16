@@ -90,7 +90,7 @@ class BravoController extends Controller
         foreach ($res->data as $value) {
             $check = B20Item::getItemByCode($value->code);
             if ($check == null) {
-                    B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511"]);
+                    B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511","ParentId"=>21297832]);
                     $check = B20Item::getItemByCode($value->code);
                     B20ItemInfo::create(["ItemId" => $check->Id, "ProductId" => $product->Id, "Weight" => 1]);
             }
