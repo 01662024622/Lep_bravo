@@ -133,7 +133,7 @@ class BravoController extends Controller
         $orders = $this->SpeedService->getOrderList()->data->orders;
         if ($orders == null) return response("true", 200);
         foreach ($orders as $order) {
-            if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null&& $orderDeatail->shopOrderId >0) $order->id = $order->shopOrderId;
+            if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null&& $order->shopOrderId >0) $order->id = $order->shopOrderId;
             if ($order->typeId == 1)  $this->procedureAddOrderReal($order, 1, 'Đơn hàng');
             if ($order->typeId == 14)  $this->procedureAddOrderRefund($order, 1, 'Đơn hàng');
         }
@@ -195,7 +195,7 @@ class BravoController extends Controller
                 $order->returnFromOrderId = property_exists($order, 'orderId') && ($order->returnFromOrderId == '' || $order->returnFromOrderId == 0) ? $order->orderId : 0;
                 $order->usedPoints = (int)(property_exists($order, 'usedPoints') ? $order->usedPoints : 0);
                 $order->discount = (int)(property_exists($order, 'discount') ? $order->discount : 0);
-                $order->calcTotalMoney = $order->money - $order->usedPoints;
+                $order->calcTotalMoney = $order->money - $order->usedPoints-$order->moneyTransfer - $order->moneyDeposit;
                 $order->type == 1 ?
                     $this->procedureAddOrderRefund($order, 2, "Bán lẻ") :
                     $this->procedureAddOrderReal($order, 2, "Bán lẻ");
