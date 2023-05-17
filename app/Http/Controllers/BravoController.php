@@ -69,7 +69,7 @@ class BravoController extends Controller
     private function procedureProducts($speed)
     {
         $parentId = $speed->parentId;
-        if ($parentId != null || $parentId > 0)
+        if ($parentId != null && $parentId > 0)
             return response('true', 200);
         return $this->importProducts($speed->productId);
     }
