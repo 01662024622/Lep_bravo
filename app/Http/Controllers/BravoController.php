@@ -195,6 +195,8 @@ class BravoController extends Controller
                 $order->returnFromOrderId = property_exists($order, 'orderId') && ($order->returnFromOrderId == '' || $order->returnFromOrderId == 0) ? $order->orderId : 0;
                 $order->usedPoints = (int)(property_exists($order, 'usedPoints') ? $order->usedPoints : 0);
                 $order->discount = (int)(property_exists($order, 'discount') ? $order->discount : 0);
+                $order->moneyTransfer = (int)(property_exists($order, 'moneyTransfer') ? $order->moneyTransfer : 0);
+                $order->moneyDeposit = (int)(property_exists($order, 'moneyDeposit') ? $order->moneyDeposit : 0);
                 $order->calcTotalMoney = $order->money - $order->usedPoints-$order->moneyTransfer - $order->moneyDeposit;
                 $order->type == 1 ?
                     $this->procedureAddOrderRefund($order, 2, "Bán lẻ") :
