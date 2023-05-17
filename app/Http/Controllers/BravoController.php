@@ -78,13 +78,13 @@ class BravoController extends Controller
         $res = $this->SpeedService->getProductDetail($id);
         $product=null;
         foreach ($res->data as $value) {
-            $product = B20Product::getItemByCode($value->code);
-            if ($product == null) {
-                if ($value->idNhanh == $id) {
-                    B20Product::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ParentId" => 26757072, "ProductType" => 2, "ConvertRate1" => 1, "ConvertRate2" => 1, "IsGroup" => 0]);
-                    $product = B20Product::getItemByCode($value->code);
-                    break;
+            if ($value->idNhanh == $id) {
+                $product = B20Product::getItemByCode($value->code);
+                if ($product == null) {
+                        B20Product::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ParentId" => 26757072, "ProductType" => 2, "ConvertRate1" => 1, "ConvertRate2" => 1, "IsGroup" => 0]);
+                        $product = B20Product::getItemByCode($value->code);
                 }
+                break;
             }
         }
         foreach ($res->data as $value) {
