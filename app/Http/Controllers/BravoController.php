@@ -763,9 +763,11 @@ class Coin
     private $allotted;
     public function getCoin(bool $endOfList, $price, $quantity)
     {
+        if($this->usedPoints == $this->allotted) return 0;
         if ($endOfList)  return $this->usedPoints - $this->allotted;
         $coin = (int)($price * $quantity * $this->moneyDiscountPercent);
         $this->allotted = $this->allotted + $coin;
+        if($this->usedPoints - $this->allotted<10) $coin = $coin + $this->usedPoints - $this->allotted;
         return $coin;
     }
 }
