@@ -242,6 +242,7 @@ class BravoController extends Controller
             }
             if ($order->type == 2) {
                 foreach ($order->products as $item) {
+                    $item = (object)$item;
                     $itemInfo = B20Item::getItemByCode($item->code);
                     if ($itemInfo == null) {
                         if ($itemInfo == null) {
