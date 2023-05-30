@@ -20,6 +20,7 @@ use App\B30AccDocSales;
 use App\B30AccDocSales1;
 use App\B30AccDocSales2;
 use App\Services\SpeedService;
+use App\vGia;
 use Illuminate\Http\Request;
 use stdClass;
 
@@ -30,10 +31,9 @@ class BravoController extends Controller
 
     public function get()
     {
-        $a = 1;
-        $b = 2;
-        $c = $a + $b;
-        return response("true", 200);
+        $data = vGia::where("WarehouseId",18960752)->where("ItemId",25477912)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
+        return $data->UnitCost;
+
     }
     public function create(Request $request)
     {
@@ -236,6 +236,11 @@ class BravoController extends Controller
                             continue;
                         }
                     }
+
+                    if($order->mode==8){
+                        $itemPrice = vGia::where("WarehouseId",$warehouses ? $warehouses->HH->Id : '20354472')->where("ItemId",$itemInfo->Id)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
+                        $item->price = $itemPrice->UnitCost;
+                    }
                     $accDocItem[] = B30AccDocItem1::setData($index, $item, $itemInfo, $warehouses, $account);
                     $index++;
                 }
@@ -243,6 +248,10 @@ class BravoController extends Controller
             if ($order->type == 2) {
                 foreach ($order->products as $item) {
                     $item = (object)$item;
+                    if($order->mode==8){
+                        $itemPrice = vGia::where("WarehouseId",$warehouses ? $warehouses->HH->Id : '20354472')->where("ItemId",$itemInfo->Id)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
+                        $item->price = $itemPrice->UnitCost;
+                    }
                     $itemInfo = B20Item::getItemByCode($item->code);
                     if ($itemInfo == null) {
                         if ($itemInfo == null) {
