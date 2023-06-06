@@ -6,6 +6,7 @@ use App\B20Customer;
 use App\B20Employee;
 use App\B20Item;
 use App\B20ItemInfo;
+use App\B20Nhanh_tontucthoi;
 use App\B20Product;
 use App\B20Warehouse;
 use App\B30AccDoc;
@@ -28,12 +29,12 @@ class BravoController extends Controller
 {
 
     private $SpeedService;
+    const STOCK = [12435, 16186, 16187, 18414, 19536, 22885, 25405, 30719, 44298, 58454, 58601, 63530, 70310, 132462, 132718, 132719, 132720, 132761, 133563];
 
     public function get()
     {
-        $data = vGia::where("WarehouseId",18960752)->where("ItemId",25477912)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
+        $data = vGia::where("WarehouseId", 18960752)->where("ItemId", 25477912)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
         return $data->UnitCost;
-
     }
     public function create(Request $request)
     {
@@ -56,6 +57,7 @@ class BravoController extends Controller
             return $this->procedureUpdateOrder($speed);
         }
         if ($speed->event == "inventoryChange") {
+            $this->updateToBravo($speed->data);
             return $this->procedureChange();
         }
         if ($speed->event == "orderDelete") {
@@ -76,13 +78,13 @@ class BravoController extends Controller
     private function importProducts($id)
     {
         $res = $this->SpeedService->getProductDetail($id);
-        $product=null;
+        $product = null;
         foreach ($res->data as $value) {
             if ($value->idNhanh == $id) {
                 $product = B20Product::getItemByCode($value->code);
                 if ($product == null) {
-                        B20Product::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ParentId" => 26757072, "ProductType" => 2, "ConvertRate1" => 1, "ConvertRate2" => 1, "IsGroup" => 0]);
-                        $product = B20Product::getItemByCode($value->code);
+                    B20Product::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ParentId" => 26757072, "ProductType" => 2, "ConvertRate1" => 1, "ConvertRate2" => 1, "IsGroup" => 0]);
+                    $product = B20Product::getItemByCode($value->code);
                 }
                 break;
             }
@@ -90,9 +92,9 @@ class BravoController extends Controller
         foreach ($res->data as $value) {
             $check = B20Item::getItemByCode($value->code);
             if ($check == null) {
-                    B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511","ParentId"=>21297832]);
-                    $check = B20Item::getItemByCode($value->code);
-                    B20ItemInfo::create(["ItemId" => $check->Id, "ProductId" => $product->Id, "Weight" => 1]);
+                B20Item::create(["Code" => $value->code, "Name" => $value->name, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511", "ParentId" => 21297832]);
+                $check = B20Item::getItemByCode($value->code);
+                B20ItemInfo::create(["ItemId" => $check->Id, "ProductId" => $product->Id, "Weight" => 1]);
             }
         }
         return response("true", 200);
@@ -105,7 +107,7 @@ class BravoController extends Controller
                 if ($valueDetail->parentId > 0) {
                     $this->importProducts($valueDetail->parentId);
                     break;
-                }else{
+                } else {
                     $this->importProducts($valueDetail->idNhanh);
                     break;
                 }
@@ -121,7 +123,7 @@ class BravoController extends Controller
         //detail order
         $orderDeatail = $this->SpeedService->getOrderDetail($speed->orderId);
         if ($orderDeatail != null) {
-            if (property_exists($orderDeatail, 'shopOrderId') && $orderDeatail->shopOrderId != null&& $orderDeatail->shopOrderId >0) $orderDeatail->id = $orderDeatail->shopOrderId;
+            if (property_exists($orderDeatail, 'shopOrderId') && $orderDeatail->shopOrderId != null && $orderDeatail->shopOrderId > 0) $orderDeatail->id = $orderDeatail->shopOrderId;
             if ($orderDeatail->typeId == 1) return $this->procedureAddOrderReal($orderDeatail, 1, 'Đơn hàng');
             if ($orderDeatail->typeId == 14) return $this->procedureAddOrderRefund($orderDeatail, 1, 'Đơn hàng');
         }
@@ -133,7 +135,7 @@ class BravoController extends Controller
         $orders = $this->SpeedService->getOrderList()->data->orders;
         if ($orders == null) return response("true", 200);
         foreach ($orders as $order) {
-            if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null&& $order->shopOrderId >0) $order->id = $order->shopOrderId;
+            if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null && $order->shopOrderId > 0) $order->id = $order->shopOrderId;
             if ($order->typeId == 1)  $this->procedureAddOrderReal($order, 1, 'Đơn hàng');
             if ($order->typeId == 14)  $this->procedureAddOrderRefund($order, 1, 'Đơn hàng');
         }
@@ -197,7 +199,7 @@ class BravoController extends Controller
                 $order->discount = (int)(property_exists($order, 'discount') ? $order->discount : 0);
                 $order->moneyTransfer = (int)(property_exists($order, 'moneyTransfer') ? $order->moneyTransfer : 0);
                 $order->moneyDeposit = (int)(property_exists($order, 'moneyDeposit') ? $order->moneyDeposit : 0);
-                $order->calcTotalMoney = $order->money - $order->usedPoints-$order->moneyTransfer - $order->moneyDeposit;
+                $order->calcTotalMoney = $order->money - $order->usedPoints - $order->moneyTransfer - $order->moneyDeposit;
                 $order->type == 1 ?
                     $this->procedureAddOrderRefund($order, 2, "Bán lẻ") :
                     $this->procedureAddOrderReal($order, 2, "Bán lẻ");
@@ -237,9 +239,9 @@ class BravoController extends Controller
                         }
                     }
 
-                    if($order->mode==8){
-                        $itemPrice = vGia::where("WarehouseId",$warehouses ? $warehouses->HH->Id : '20354472')->where("ItemId",$itemInfo->Id)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
-                        $item->price = $itemPrice->UnitCost;
+                    if ($order->mode == 8) {
+                        $itemPrice = vGia::where("WarehouseId", $warehouses ? $warehouses->HH->Id : '20354472')->where("ItemId", $itemInfo->Id)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
+                        $item->price = $itemPrice != null && property_exists($itemPrice, 'UnitCost') ? $itemPrice->UnitCost : 0;
                     }
                     $accDocItem[] = B30AccDocItem1::setData($index, $item, $itemInfo, $warehouses, $account);
                     $index++;
@@ -248,9 +250,9 @@ class BravoController extends Controller
             if ($order->type == 2) {
                 foreach ($order->products as $item) {
                     $item = (object)$item;
-                    if($order->mode==8){
-                        $itemPrice = vGia::where("WarehouseId",$warehouses ? $warehouses->HH->Id : '20354472')->where("ItemId",$itemInfo->Id)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
-                        $item->price = $itemPrice->UnitCost;
+                    if ($order->mode == 8) {
+                        $itemPrice = vGia::where("WarehouseId", $warehouses ? $warehouses->HH->Id : '20354472')->where("ItemId", $itemInfo->Id)->orderBy('DocDate', 'DESC')->select("UnitCost")->first();
+                        $item->price = $itemPrice != null && property_exists($itemPrice, 'UnitCost') ? $itemPrice->UnitCost : 0;
                     }
                     $itemInfo = B20Item::getItemByCode($item->code);
                     if ($itemInfo == null) {
@@ -737,6 +739,27 @@ class BravoController extends Controller
         }
         return response("true", 200);
     }
+
+    private function updateToBravo($data)
+    {
+        $data = (object) $data;
+        foreach ($data as $val) {
+            $array = [];
+            foreach ($val->depots as $key => $depot) {
+                if(!in_array($key,self::STOCK)) continue;
+                $array['K'.$key]=$depot->available;
+            }
+            $check = B20Nhanh_tontucthoi::Where("ItemId",$val->id)->first();
+            if($check==null){
+                $array["ItemId"] = $val->id;
+                $array["Code"] = $val->code;
+                B20Nhanh_tontucthoi::create($array);
+            }else{
+                B20Nhanh_tontucthoi::where("ItemId",$val->id)->update($array);
+            }
+
+        }
+    }
     private function getCustomerLevelId($id, $customer)
     {
         $customerSpeeds = $this->SpeedService->getCustomerDetail($id);
@@ -773,11 +796,11 @@ class Coin
     private $allotted;
     public function getCoin(bool $endOfList, $price, $quantity)
     {
-        if($this->usedPoints == $this->allotted) return 0;
+        if ($this->usedPoints == $this->allotted) return 0;
         if ($endOfList)  return $this->usedPoints - $this->allotted;
         $coin = (int)($price * $quantity * $this->moneyDiscountPercent);
         $this->allotted = $this->allotted + $coin;
-        if($this->usedPoints - $this->allotted<10) $coin = $coin + $this->usedPoints - $this->allotted;
+        if ($this->usedPoints - $this->allotted < 10) $coin = $coin + $this->usedPoints - $this->allotted;
         return $coin;
     }
 }

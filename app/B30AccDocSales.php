@@ -67,7 +67,7 @@ class B30AccDocSales extends Model
     }
     public static function setDataRefund($order, $customer, $employeeid, $warehouses): array
     {
-
+        $order->description=strlen($order->description) > 100 ? substr($order->description,0,50)."..." : $order->description;
         $address = $order->customerAddress . "-" . $order->customerWard . "-" . $order->customerDistrict . "-" . $order->customerCity;
         return [
             'DocNo' => 'TLN' . $order->id,

@@ -22,6 +22,7 @@ class B30AccDocItem extends Model
     public $timestamps = false;
     public static function setData($order, $employeeid,$warehouses): array
     {
+        $order->description=strlen($order->description) > 100 ? substr($order->description,0,50)."..." : $order->description;
        return [
             'DocNo' => $order->type==1?'NKN' . $order->id:'XKN'. $order->id,
             'DocDate' => Carbon::today()->format('Y-m-d'),
@@ -37,7 +38,7 @@ class B30AccDocItem extends Model
             'TotalOriginalAmount'=>$order->money,
             'DeptId' => $warehouses ? $warehouses->HH->ClassCode3 : '20354472',
 
-            'TransCode' => $order->mod==8?($order->type==1?'2116':'2215'):($order->type==1?'2100':'2211'),
+            'TransCode' => $order->mode==8?($order->type==1?'2116':'2215'):($order->type==1?'2100':'2211'),
             'Description' => trim(str_replace('Kho hàng hóa','',$warehouses?$warehouses->HH->Name:''))."-".$order->description,
             'CurrencyCode' => 'VND',
             'DiscountRate' => 0,

@@ -25,6 +25,7 @@ class B30AccDocAtchDoc extends Model
     public static function setData($order, $customer,$warehouses,$Stt): array
     {
 
+        $order->description=strlen($order->description) > 100 ? substr($order->description,0,50)."..." : $order->description;
         return [
             'OriginalDueAmount'=>$order->calcTotalMoney,
             'DueAmount'=>$order->calcTotalMoney,

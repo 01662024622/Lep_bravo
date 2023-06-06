@@ -23,6 +23,7 @@ class B30AccDocPrepay extends Model
 
     public static function setData($order,$customer, $warehouses, $Stt): array
     {
+        $order->description=strlen($order->description) > 100 ? substr($order->description,0,50)."..." : $order->description;
         return  [
             'CustomerId' => $customer->Id,
             'DocNo' => "TLN".$order->Id,
