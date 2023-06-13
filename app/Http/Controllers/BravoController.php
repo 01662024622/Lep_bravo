@@ -320,7 +320,7 @@ class BravoController extends Controller
         $order->moneyDiscount = $order->moneyDiscount ? $order->moneyDiscount : 0;
         $order->moneyTransfer = property_exists($order, 'moneyTransfer') && $order->moneyTransfer !== null ? $order->moneyTransfer : 0;
         $order->moneyDeposit = property_exists($order, 'moneyDeposit') && $order->moneyDeposit !== null ? $order->moneyDeposit : 0;
-        $order->calcTotalMoney = $order->calcTotalMoney ? abs($order->calcTotalMoney) + $order->moneyTransfer + $order->moneyDeposit : $order->moneyDeposit + $order->moneyTransfer;
+        $order->calcTotalMoney = $order->calcTotalMoney == null ? abs($order->calcTotalMoney) + $order->moneyTransfer + $order->moneyDeposit : $order->moneyDeposit + $order->moneyTransfer;
         if ($order->saleChannel == 41) {
             if ($warehouses != null) {
                 $warehouses->HH->ClassCode2 = '131H';
@@ -466,7 +466,7 @@ class BravoController extends Controller
         $employeeid = $order->saleId ? B20Employee::getEmployee($order->saleId) : null;
         $order->moneyDiscount = $order->moneyDiscount ? $order->moneyDiscount : 0;
         $order->moneyTransfer = property_exists($order, 'moneyTransfer') && $order->moneyTransfer ? $order->moneyTransfer : 0;
-        $order->calcTotalMoney = $order->calcTotalMoney ? abs($order->calcTotalMoney) + $order->moneyTransfer : $order->moneyTransfer;
+        $order->calcTotalMoney = $order->calcTotalMoney == null ? abs($order->calcTotalMoney) + $order->moneyTransfer : $order->moneyTransfer;
         $order->description = $typeDoc . "-" . $order->description;
         $data = B30AccDocSales::setDataRefund($order, $customer, $employeeid, $warehouses);
         if (!property_exists($order, 'returnFromOrderId') || $order->returnFromOrderId == 0) $order->returnFromOrderId = $order->relatedBillId;
