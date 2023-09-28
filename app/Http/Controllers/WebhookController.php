@@ -167,7 +167,8 @@ class WebhookController extends Controller
 
         if (!property_exists($resProduct, 'data')) {
              $this->ErpService->login();
-            if($this->ErpService->t) return response("true", 200);
+             $tok = $this->ErpService->login();
+             if($tok=="") return response("true", 200);
 
             $resProduct = $this->ErpService->createProduct($product);
             if (!property_exists($resProduct, 'data')) return response("true", 200);
