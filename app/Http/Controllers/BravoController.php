@@ -95,7 +95,7 @@ class BravoController extends Controller
             $check = B20Item::getItemByCode($value->code);
             if ($check == null) {
                 $branch = "";
-                if ($value->branchId > 0 && $value->branchId < 5)
+                if (property_exists($value, 'branchId') && $value->branchId > 0 && $value->branchId < 5)
                     $branch = self::BRANCH[$value->branchId];
                 B20Item::create(["Code" => $value->code, "Name" => $value->name, "Linhvuc" => $branch, "Unit" => "Chiếc", "ItemType" => 1, "ItemGroupCode" => "15511", "ParentId" => 21297832]);
                 $check = B20Item::getItemByCode($value->code);
