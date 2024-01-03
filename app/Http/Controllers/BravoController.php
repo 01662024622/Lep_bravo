@@ -453,8 +453,8 @@ class BravoController extends Controller
         }
         $data['TotalOriginalAmount0'] = $Amount9;
         $data['TotalAmount0'] = $Amount9;
-        $data['TotalOriginalAmount'] = $Amount9 - $data['TotalOriginalAmount4'];
-        $data['TotalAmount'] = $Amount9 - $data['TotalAmount4'];
+        $data['TotalOriginalAmount'] = $Amount9 - $data['TotalOriginalAmount4'] - $data['TotalOriginalAmount41'];
+        $data['TotalAmount'] = $Amount9 - $data['TotalAmount4'] - $data['TotalAmount41'];
 
         $acc = B30AccDocSales::create($data);
         $acc = B30AccDocSales::find($acc->Id);
