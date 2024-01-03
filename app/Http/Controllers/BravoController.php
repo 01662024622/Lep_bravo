@@ -447,7 +447,7 @@ class BravoController extends Controller
 
         $Amount9 = 0;
         foreach ($listAccDocSale1 as $obj) {
-            if (isset($obj->total)) {
+            if (isset($obj->Amount9)) {
                 $Amount9 += $obj->Amount9;
             }
         }
