@@ -447,8 +447,8 @@ class BravoController extends Controller
 
         $Amount9 = 0;
         foreach ($listAccDocSale1 as $obj) {
-            if (isset($obj->Amount9)) {
-                $Amount9 += $obj->Amount9;
+            if (isset($obj['Amount9'])) {
+                $Amount9 += $obj['Amount9'];
             }
         }
         $data['TotalOriginalAmount0'] = $Amount9;
@@ -832,11 +832,13 @@ class Coin
     function __construct($order)
     {
         $this->usedPoints = $order->usedPoints;
-        $this->moneyDiscountPercent = $order->usedPoints / ($order->calcTotalMoney + $order->moneyDiscount + $order->usedPoints);
+        if (($order->calcTotalMoney + $order->moneyDiscount + $order->usedPoints) > 0)
+            $this->moneyDiscountPercent = $order->usedPoints / ($order->calcTotalMoney + $order->moneyDiscount + $order->usedPoints);
+
         $this->allotted = 0;
     }
     private $usedPoints;
-    private $moneyDiscountPercent;
+    private $moneyDiscountPercent = 0;
     private $allotted;
     public function getCoin(bool $endOfList, $price, $quantity)
     {
