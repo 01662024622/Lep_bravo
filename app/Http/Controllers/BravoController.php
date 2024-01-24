@@ -91,6 +91,7 @@ class BravoController extends Controller
                 break;
             }
         }
+        if($product==null) $product = new B20Product();
         foreach ($res->data as $value) {
             $check = B20Item::getItemByCode($value->code);
             if ($check == null) {
@@ -128,7 +129,7 @@ class BravoController extends Controller
         //detail order
         $orderDeatail = $this->SpeedService->getOrderDetail($speed->orderId);
         if ($orderDeatail != null) {
-            if (property_exists($orderDeatail, 'shopOrderId') && $orderDeatail->shopOrderId != null && $orderDeatail->shopOrderId > 0)
+            if (property_exists($orderDeatail, 'shopOrderId') && $orderDeatail->shopOrderId != null && $orderDeatail->shopOrderId > 0 && (!property_exists($orderDeatail, 'saleChannel')||$orderDeatail->saleChannel != 10))
                 $orderDeatail->id = $orderDeatail->shopOrderId;
             if ($orderDeatail->typeId == 1)
                 return $this->procedureAddOrderReal($orderDeatail, 1, 'Đơn hàng');
@@ -144,7 +145,7 @@ class BravoController extends Controller
         if ($orders == null)
             return response("true", 200);
         foreach ($orders as $order) {
-            if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null && $order->shopOrderId > 0)
+            if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null && $order->shopOrderId > 0 && (!property_exists($order, 'saleChannel')||$order->saleChannel != 10))
                 $order->id = $order->shopOrderId;
             if ($order->typeId == 1)
                 $this->procedureAddOrderReal($order, 1, 'Đơn hàng');
@@ -700,7 +701,7 @@ class BravoController extends Controller
     {
 
         $order = $this->SpeedService->getOrderDetail($speed->orderId);
-        if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null)
+        if (property_exists($order, 'shopOrderId') && $order->shopOrderId != null&& $order->shopOrderId>0 && (!property_exists($order, 'saleChannel')&&$order->saleChannel != 10))
             $order->id = $order->shopOrderId;
         if ($order == null)
             return response("true", 200);
