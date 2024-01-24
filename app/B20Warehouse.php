@@ -16,9 +16,9 @@ class B20Warehouse extends Model
     public static function getWarehouse(int $id)
     {
         $warehouses=new stdClass();
-        $warehouse = B20Warehouse::where('ClassCode1', "HH-".$id)->get();
-        if (sizeof($warehouse) > 0) {
-            $warehouses->HH = $warehouse[0];
+        $warehouseHH = B20Warehouse::where('ClassCode1', "HH-".$id)->get();
+        if (sizeof($warehouseHH) > 0) {
+            $warehouses->HH = $warehouseHH[0];
         }else{
             return null;
         }
@@ -26,7 +26,7 @@ class B20Warehouse extends Model
         if (sizeof($warehouse) > 0) {
             $warehouses->TP = $warehouse[0];
         }else{
-            return null;
+            $warehouses->TP = $warehouseHH[0];
         }
 
         return $warehouses;
