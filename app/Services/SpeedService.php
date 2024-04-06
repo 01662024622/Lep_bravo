@@ -12,7 +12,7 @@ use Unirest\Request\Body;
 class SpeedService
 {
     private static $service;
-    private const TOKEN = "7anjS4b4hxRKM6KlBVeNCWWRYtcPZ8T74EWHYeVqIMLl4OmAtNTAV6mbYZ9R7QC4kh1lROEgUT52qEeeW9PO3GYmMFSve5UNYc3ZMyYoNQKDTkl1vJaGZSt1R4ziD7ElUelow8QJUZSlS2PXMPAjuYtEAMjp77Ufb";
+    private const TOKEN = "ZhuJP2EhyY6gW8lKAc4SNuV1oXwojPAga5B9wuPgnmzhMSPHwyYbpOMxmx3CuWuiZ11NHmB1jUELMvco327QGSMAtesICRymkTyCOpZSVokSfKtkzdmTdxn9MwvOZ8pw0lH4AVaXQ75AXkpBDotws";
 
 
     private function __construct()
@@ -94,7 +94,7 @@ class SpeedService
         return $response->body;
     }
     private function getBody($data):string {
-        return "appId=73363&version=2.0&businessId=16294&accessToken=".self::TOKEN
+        return "appId=74190&version=2.0&businessId=16294&accessToken=".self::TOKEN
             ."&data=".$data;
     }
 }

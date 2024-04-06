@@ -475,7 +475,7 @@ class BravoController extends Controller
             B30AccDocSales1::create($shipSave);
         }
         B30AccDocAtchDoc::create(B30AccDocAtchDoc::setData($order, $customer, $warehouses, $acc->Stt));
-         ::runExec($acc);
+        B30AccDocSales::runExec($acc);
         return response("true", 200);
     }
 
